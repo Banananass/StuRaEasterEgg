@@ -1,35 +1,36 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+    <?php
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+    error_reporting(E_ALL);
+    ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EasterEgg</title>
     <style>
-        /*
-         * Skalierungsstrategie:
-         *  – Alle Schrift- & Abstands-Grössen nutzen clamp(min, fluid, max)
-         *  – Der fluid-Wert basiert auf vw, damit alles mit der
-         *    tatsächlichen Fensterbreite wächst (auch bei QHD/4K).
-         *  – max-width des Spielfeldes wächst mit dem Viewport mit.
-         */
-
         :root {
-            --fs-xs:   clamp(0.60rem, 0.9vw,  1.05rem);
-            --fs-sm:   clamp(0.70rem, 1.0vw,  1.15rem);
-            --fs-md:   clamp(0.80rem, 1.15vw, 1.30rem);
-            --fs-lg:   clamp(1.00rem, 1.5vw,  1.70rem);
-            --fs-xl:   clamp(1.30rem, 2.0vw,  2.40rem);
-            --fs-hero: clamp(3.00rem, 6vw,    7.00rem);
+            --fs-xs: clamp(0.60rem, 0.9vw, 1.05rem);
+            --fs-sm: clamp(0.70rem, 1.0vw, 1.15rem);
+            --fs-md: clamp(0.80rem, 1.15vw, 1.30rem);
+            --fs-lg: clamp(1.00rem, 1.5vw, 1.70rem);
+            --fs-xl: clamp(1.30rem, 2.0vw, 2.40rem);
+            --fs-hero: clamp(3.00rem, 6vw, 7.00rem);
 
-            --gap:     clamp(8px,  1.2vw, 20px);
-            --pad:     clamp(8px,  1.4vw, 24px);
-            --radius:  clamp(8px,  1.0vw, 16px);
-            --bar-h:   clamp(14px, 1.4vh, 26px);
+            --gap: clamp(8px, 1.2vw, 20px);
+            --pad: clamp(8px, 1.4vw, 24px);
+            --radius: clamp(8px, 1.0vw, 16px);
+            --bar-h: clamp(14px, 1.4vh, 26px);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        html{
+        html {
             width: 100%;
             height: 100%;
         }
@@ -51,10 +52,13 @@
             font-size: var(--fs-xl);
             text-align: center;
             color: #f39c12;
-            text-shadow: 0 0 12px rgba(243,156,18,0.6);
+            text-shadow: 0 0 12px rgba(243, 156, 18, 0.6);
             margin-bottom: 0.4em;
         }
-        h1 span { font-size: 1.15em; }
+
+        h1 span {
+            font-size: 1.15em;
+        }
 
         #subtitle {
             font-size: var(--fs-xs);
@@ -74,8 +78,8 @@
 
         /* ── Stats panel ── */
         #stats {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(243,156,18,0.3);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(243, 156, 18, 0.3);
             border-radius: var(--radius);
             padding: var(--gap) calc(var(--gap) * 1.2);
             grid-column: 1 / -1;
@@ -85,16 +89,19 @@
             justify-content: space-between;
             align-items: center;
         }
+
         .stat-box {
             text-align: center;
             flex: 1;
             min-width: clamp(80px, 10vw, 160px);
         }
+
         .stat-box .val {
             font-size: var(--fs-lg);
             font-weight: bold;
             color: #f39c12;
         }
+
         .stat-box .lbl {
             font-size: var(--fs-xs);
             color: #aaa;
@@ -104,8 +111,8 @@
 
         /* ── Biber area ── */
         #biber-panel {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(243,156,18,0.3);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(243, 156, 18, 0.3);
             border-radius: var(--radius);
             padding: var(--pad);
             display: flex;
@@ -125,16 +132,26 @@
         #beaver-display {
             font-size: var(--fs-hero);
             line-height: 1;
-            filter: drop-shadow(0 0 10px rgba(243,156,18,0.5));
+            filter: drop-shadow(0 0 10px rgba(243, 156, 18, 0.5));
             cursor: default;
             transition: transform 0.1s;
             user-select: none;
         }
-        #beaver-display.wiggle { animation: wiggle 0.4s ease; }
+
+        #beaver-display.wiggle {
+            animation: wiggle 0.4s ease;
+        }
+
         @keyframes wiggle {
-            0%,100% { transform: rotate(0deg) scale(1); }
-            25%  { transform: rotate(-8deg) scale(1.1); }
-            75%  { transform: rotate(8deg)  scale(1.1); }
+            0%, 100% {
+                transform: rotate(0deg) scale(1);
+            }
+            25% {
+                transform: rotate(-8deg) scale(1.1);
+            }
+            75% {
+                transform: rotate(8deg) scale(1.1);
+            }
         }
 
         #beaver-title {
@@ -147,13 +164,14 @@
 
         #juice-bar-container {
             width: 100%;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 999px;
             height: var(--bar-h);
             overflow: hidden;
-            border: 1px solid rgba(243,156,18,0.2);
+            border: 1px solid rgba(243, 156, 18, 0.2);
             position: relative;
         }
+
         #juice-bar {
             height: 100%;
             background: linear-gradient(90deg, #e67e22, #f39c12, #f1c40f);
@@ -161,6 +179,7 @@
             transition: width 0.5s linear;
             width: 0;
         }
+
         #juice-bar-label {
             position: absolute;
             inset: 0;
@@ -168,7 +187,7 @@
             align-items: center;
             justify-content: center;
             font-size: var(--fs-xs);
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             font-weight: bold;
             pointer-events: none;
         }
@@ -186,8 +205,15 @@
             pointer-events: none;
             transition: opacity 0.3s, transform 0.1s;
         }
-        #prestige-btn.active { opacity: 1; pointer-events: auto; }
-        #prestige-btn.active:hover { transform: scale(1.02); }
+
+        #prestige-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #prestige-btn.active:hover {
+            transform: scale(1.02);
+        }
 
         #prestige-count {
             font-size: var(--fs-xs);
@@ -205,8 +231,8 @@
 
         /* ── Upgrades panel ── */
         #upgrades-panel {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(243,156,18,0.3);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(243, 156, 18, 0.3);
             border-radius: var(--radius);
             padding: var(--gap);
             display: flex;
@@ -215,6 +241,7 @@
             overflow-y: auto;
             max-height: clamp(250px, 45vh, 600px);
         }
+
         #upgrades-panel h2 {
             font-size: var(--fs-md);
             color: #f39c12;
@@ -224,8 +251,8 @@
         }
 
         .upgrade-btn {
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: calc(var(--radius) * 0.7);
             padding: 0.5em 0.7em;
             color: #e0e0e0;
@@ -235,12 +262,18 @@
             width: 100%;
             position: relative;
         }
+
         .upgrade-btn:not(:disabled):hover {
-            background: rgba(243,156,18,0.15);
-            border-color: rgba(243,156,18,0.5);
+            background: rgba(243, 156, 18, 0.15);
+            border-color: rgba(243, 156, 18, 0.5);
             transform: scale(1.01);
         }
-        .upgrade-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        .upgrade-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
         .upgrade-btn .upg-name {
             font-size: var(--fs-sm);
             font-weight: bold;
@@ -248,62 +281,74 @@
             align-items: center;
             gap: 4px;
         }
+
         .upgrade-btn .upg-desc {
             font-size: var(--fs-xs);
             color: #aaa;
             margin-top: 2px;
         }
+
         .upgrade-btn .upg-cost {
             font-size: var(--fs-xs);
             color: #f39c12;
             margin-top: 3px;
         }
+
         .upgrade-btn .upg-count {
             position: absolute;
-            top: 0.4em; right: 0.6em;
+            top: 0.4em;
+            right: 0.6em;
             font-size: var(--fs-xs);
-            background: rgba(243,156,18,0.2);
+            background: rgba(243, 156, 18, 0.2);
             color: #f39c12;
             border-radius: 999px;
             padding: 1px 0.5em;
         }
+
         .upgrade-btn.maxed {
-            border-color: rgba(46,204,113,0.4);
-            background: rgba(46,204,113,0.05);
+            border-color: rgba(46, 204, 113, 0.4);
+            background: rgba(46, 204, 113, 0.05);
         }
-        .upgrade-btn.maxed .upg-cost { color: #2ecc71; }
+
+        .upgrade-btn.maxed .upg-cost {
+            color: #2ecc71;
+        }
 
         /* ── Milestones ── */
         #milestones {
             grid-column: 1 / -1;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: var(--radius);
             padding: calc(var(--gap) * 0.8) var(--gap);
         }
+
         #milestones h2 {
             font-size: var(--fs-sm);
             color: #aaa;
             margin-bottom: calc(var(--gap) * 0.5);
         }
+
         #milestone-list {
             display: flex;
             flex-wrap: wrap;
             gap: calc(var(--gap) * 0.5);
         }
+
         .milestone {
             font-size: var(--fs-xs);
             padding: 0.2em 0.7em;
             border-radius: 999px;
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             color: #777;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             transition: all 0.4s;
         }
+
         .milestone.unlocked {
-            background: rgba(243,156,18,0.15);
+            background: rgba(243, 156, 18, 0.15);
             color: #f39c12;
-            border-color: rgba(243,156,18,0.4);
+            border-color: rgba(243, 156, 18, 0.4);
         }
 
         /* ── Floating juice drops ── */
@@ -314,15 +359,31 @@
             animation: dropFloat 2.5s ease-out forwards;
             z-index: 999;
         }
+
         @keyframes dropFloat {
-            0%   { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-80px) scale(0.5); }
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-80px) scale(0.5);
+            }
         }
 
         /* ── Scrollbar ── */
-        #upgrades-panel::-webkit-scrollbar { width: 4px; }
-        #upgrades-panel::-webkit-scrollbar-track { background: transparent; }
-        #upgrades-panel::-webkit-scrollbar-thumb { background: rgba(243,156,18,0.3); border-radius: 4px; }
+        #upgrades-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #upgrades-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #upgrades-panel::-webkit-scrollbar-thumb {
+            background: rgba(243, 156, 18, 0.3);
+            border-radius: 4px;
+        }
 
         /* ══════════════════════════════════════
            RESPONSIVE BREAKPOINTS
@@ -330,26 +391,41 @@
 
         /* Smartphone: alles in einer Spalte */
         @media (max-width: 480px) {
-            #game { grid-template-columns: 1fr; }
+            #game {
+                grid-template-columns: 1fr;
+            }
 
             #biber-panel {
                 flex-direction: row;
                 flex-wrap: wrap;
                 justify-content: center;
             }
-            #beaver-display { flex-shrink: 0; }
+
+            #beaver-display {
+                flex-shrink: 0;
+            }
+
             #biber-info {
                 flex: 1;
                 min-width: 160px;
                 align-items: flex-start;
             }
-            #milestones { grid-column: 1; }
+
+            #milestones {
+                grid-column: 1;
+            }
         }
 
         /* Sehr kleines Smartphone */
         @media (max-width: 360px) {
-            #stats { flex-direction: column; }
-            .stat-box { min-width: unset; width: 100%; }
+            #stats {
+                flex-direction: column;
+            }
+
+            .stat-box {
+                min-width: unset;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -409,20 +485,20 @@
     // ═══════════════════════════════════════════════════════════
     function sendDimensions() {
         const height = document.documentElement.scrollHeight || document.body.scrollHeight;
-        window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+        window.parent.postMessage({type: 'setHeight', height: height}, '*');
     }
 
     window.addEventListener("DOMContentLoaded", sendDimensions);
     window.addEventListener("resize", sendDimensions);
 
     const originalRenderUpgrades = renderUpgrades;
-    renderUpgrades = function() {
+    renderUpgrades = function () {
         originalRenderUpgrades();
         sendDimensions();
     };
 
     const originalRenderMilestones = renderMilestones;
-    renderMilestones = function() {
+    renderMilestones = function () {
         originalRenderMilestones();
         sendDimensions();
     };
@@ -522,30 +598,30 @@
     ];
 
     const TITLES = [
-        { threshold: 0,       title: 'Praktikant',           emoji: '🦫' },
-        { threshold: 50,      title: 'Junior-Saft-Wart',     emoji: '🦫' },
-        { threshold: 500,     title: 'StuRa-Mitglied',       emoji: '🦫🎒' },
-        { threshold: 2000,    title: 'Ausschuss-Vorsitz',    emoji: '🦫📋' },
-        { threshold: 10000,   title: 'Ober-Biber',           emoji: '🦫👑' },
-        { threshold: 50000,   title: 'Saft-Minister',        emoji: '🦫🧃' },
-        { threshold: 250000,  title: 'Biberweiser',          emoji: '🦫🧙' },
-        { threshold: 1000000, title: 'Ehren-StuRa-Präsident', emoji: '🦫🏛️' },
+        {threshold: 0, title: 'Praktikant', emoji: '🦫'},
+        {threshold: 50, title: 'Junior-Saft-Wart', emoji: '🦫'},
+        {threshold: 500, title: 'StuRa-Mitglied', emoji: '🦫🎒'},
+        {threshold: 2000, title: 'Ausschuss-Vorsitz', emoji: '🦫📋'},
+        {threshold: 10000, title: 'Ober-Biber', emoji: '🦫👑'},
+        {threshold: 50000, title: 'Saft-Minister', emoji: '🦫🧃'},
+        {threshold: 250000, title: 'Biberweiser', emoji: '🦫🧙'},
+        {threshold: 1000000, title: 'Ehren-StuRa-Präsident', emoji: '🦫🏛️'},
     ];
 
     const MILESTONES = [
-        { id: 'm1',    threshold: 10,       label: '10 L gepresst' },
-        { id: 'm2',    threshold: 100,      label: '100 L Saft' },
-        { id: 'm3',    threshold: 1000,     label: '1.000 L' },
-        { id: 'm4',    threshold: 10000,    label: '10.000 L' },
-        { id: 'm5',    threshold: 100000,   label: '100.000 L' },
-        { id: 'm6',    threshold: 1000000,  label: '1 Mio. Liter 🎉' },
-        { id: 'm7',    threshold: 10000000, label: '10 Mio. Liter 🚀' },
-        { id: 'sps1',  threshold: null,     label: '1 Saft/s erreicht',  spsReq: 1 },
-        { id: 'sps2',  threshold: null,     label: '10 Saft/s',          spsReq: 10 },
-        { id: 'sps3',  threshold: null,     label: '100 Saft/s',         spsReq: 100 },
-        { id: 'sps4',  threshold: null,     label: '1.000 Saft/s',       spsReq: 1000 },
-        { id: 'pres1', threshold: null,     label: '1. Prestige',        prestigeReq: 1 },
-        { id: 'pres3', threshold: null,     label: '3× Prestige',        prestigeReq: 3 },
+        {id: 'm1', threshold: 10, label: '10 L gepresst'},
+        {id: 'm2', threshold: 100, label: '100 L Saft'},
+        {id: 'm3', threshold: 1000, label: '1.000 L'},
+        {id: 'm4', threshold: 10000, label: '10.000 L'},
+        {id: 'm5', threshold: 100000, label: '100.000 L'},
+        {id: 'm6', threshold: 1000000, label: '1 Mio. Liter 🎉'},
+        {id: 'm7', threshold: 10000000, label: '10 Mio. Liter 🚀'},
+        {id: 'sps1', threshold: null, label: '1 Saft/s erreicht', spsReq: 1},
+        {id: 'sps2', threshold: null, label: '10 Saft/s', spsReq: 10},
+        {id: 'sps3', threshold: null, label: '100 Saft/s', spsReq: 100},
+        {id: 'sps4', threshold: null, label: '1.000 Saft/s', spsReq: 1000},
+        {id: 'pres1', threshold: null, label: '1. Prestige', prestigeReq: 1},
+        {id: 'pres3', threshold: null, label: '3× Prestige', prestigeReq: 3},
     ];
 
     const LOGS = [
@@ -573,7 +649,7 @@
         prestigeCount: 0,
         prestigeBonus: 1.0,
         unlockedMilestones: [],
-        upgrades: UPGRADES.map(u => ({ id: u.id, count: 0 })),
+        upgrades: UPGRADES.map(u => ({id: u.id, count: 0})),
     };
 
     function loadState() {
@@ -581,18 +657,19 @@
             const raw = localStorage.getItem('stura_juice_idle');
             if (raw) {
                 const saved = JSON.parse(raw);
-                state = { ...state, ...saved };
+                state = {...state, ...saved};
                 // merge upgrade counts back
                 state.upgrades.forEach(su => {
                     const upg = UPGRADES.find(u => u.id === su.id);
                     if (upg) upg.count = su.count;
                 });
             }
-        } catch(e) {}
+        } catch (e) {
+        }
     }
 
     function saveState() {
-        state.upgrades = UPGRADES.map(u => ({ id: u.id, count: u.count }));
+        state.upgrades = UPGRADES.map(u => ({id: u.id, count: u.count}));
         localStorage.setItem('stura_juice_idle', JSON.stringify(state));
     }
 
@@ -670,7 +747,7 @@
 
         // juice bar (max display = 10000 units of "next milestone")
         const nextMil = MILESTONES.filter(m => m.threshold && !state.unlockedMilestones.includes(m.id))
-            .sort((a,b) => a.threshold - b.threshold)[0];
+            .sort((a, b) => a.threshold - b.threshold)[0];
         const target = nextMil ? nextMil.threshold : 10000000;
         const pct = Math.min(100, (state.totalJuice / target) * 100);
         document.getElementById('juice-bar').style.width = pct + '%';
@@ -699,7 +776,10 @@
         UPGRADES.forEach(upg => {
             const btn = document.createElement('button');
             btn.className = 'upgrade-btn' + (upg.count >= upg.max ? ' maxed' : '');
-            btn.onclick = () => { buyUpgrade(upg.id); renderUpgrades(); };
+            btn.onclick = () => {
+                buyUpgrade(upg.id);
+                renderUpgrades();
+            };
             const cost = getUpgradeCost(upg);
             const canBuy = state.juice >= cost && upg.count < upg.max;
             btn.disabled = !canBuy;
@@ -753,12 +833,14 @@
     // ═══════════════════════════════════════════════════════════
 
     let lastLog = '';
+
     function logMsg(msg) {
         lastLog = msg;
         document.getElementById('log').textContent = msg;
     }
 
     let wiggleTimeout;
+
     function triggerWiggle() {
         const disp = document.getElementById('beaver-display');
         disp.classList.remove('wiggle');
@@ -846,4 +928,3 @@
 </script>
 </body>
 </html>
-
