@@ -1,0 +1,86 @@
+name: Deploy via SFTP
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: Deploy files to SFTP server
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SFTP_PRIVATE_KEY: ${{ secrets.SFTP_PRIVATE_KEY }}
+          SFTP_REMOTE_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
+        run: |
+          set -euo pipefail
+
+          required_vars=(SFTP_HOST SFTP_USERNAME SFTP_REMOTE_DIR)
+          for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+              echo "::error::Missing required secret: ${var}"
+              exit 1
+            fi
+          done
+
+          if [ -z "${SFTP_PASSWORD}" ] && [ -z "${SFTP_PRIVATE_KEY}" ]; then
+            echo "::error::Set either SFTP_PASSWORD or SFTP_PRIVATE_KEY"
+            exit 1
+          fi
+
+          umask 077
+          lftp_script="${RUNNER_TEMP}/deploy.lftp"
+          key_file=""
+
+          cleanup() {
+            if [ -n "${key_file}" ] && [ -e "${key_file}" ] && ! rm "${key_file}"; then
+              echo "::warning::Failed to remove temporary SSH key file"
+            fi
+            if [ -e "${lftp_script}" ] && ! rm "${lftp_script}"; then
+              echo "::warning::Failed to remove temporary lftp script"
+            fi
+          }
+          trap cleanup EXIT
+
+          exclude_globs=(.git* .github .env* .npmrc *.pem *.key *.p12 *.pfx id_rsa* id_ed25519* credentials* secrets* .aws)
+          mirror_cmd="mirror -R --delete --verbose"
+          for pattern in "${exclude_globs[@]}"; do
+            mirror_cmd="${mirror_cmd} --exclude-glob ${pattern}"
+          done
+          mirror_cmd="${mirror_cmd} . ${SFTP_REMOTE_DIR}"
+
+          {
+            echo "set cmd:fail-exit yes"
+            echo "set sftp:auto-confirm yes"
+
+            if [ -n "${SFTP_PRIVATE_KEY}" ]; then
+              key_file="$(mktemp "${RUNNER_TEMP}/sftp_key.XXXXXX")"
+              printf '%s\n' "${SFTP_PRIVATE_KEY}" > "${key_file}"
+              chmod 600 "${key_file}"
+              echo "set sftp:connect-program \"ssh -a -x -i ${key_file}\""
+              echo "open -u ${SFTP_USERNAME} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
+            else
+              echo "open -u ${SFTP_USERNAME},${SFTP_PASSWORD} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
+            fi
+
+            echo "${mirror_cmd}"
+            echo "bye"
+          } > "${lftp_script}"
+
+          chmod 600 "${lftp_script}"
+          lftp -f "${lftp_script}"
