@@ -66,6 +66,12 @@ jobs:
           }
           trap cleanup EXIT
 
+          lftp_escape() {
+            local value="${1//\\/\\\\}"
+            value="${value//\"/\\\"}"
+            printf '"%s"' "${value}"
+          }
+
           # Quote each pattern to prevent bash from glob-expanding the array
           # elements against the checkout directory (e.g. .git* → .git .github
           # .gitignore), which would break the intended exclude patterns.
@@ -88,7 +94,7 @@ jobs:
               echo "open sftp://${SFTP_USERNAME}@${SFTP_HOST}:${SFTP_PORT:-22}"
             else
               echo "open sftp://${SFTP_HOST}:${SFTP_PORT:-22}"
-              echo "user ${SFTP_USERNAME} ${SFTP_PASSWORD}"
+              echo "user $(lftp_escape "${SFTP_USERNAME}") $(lftp_escape "${SFTP_PASSWORD}")"
             fi
 
             echo "${mirror_cmd}"
