@@ -11,5 +11,9 @@ Configure these repository secrets in GitHub before running deployments:
 - `SFTP_HOST`
 - `SFTP_PORT` (optional, defaults to `22`)
 - `SFTP_USERNAME`
-- `SFTP_PASSWORD`
 - `SFTP_REMOTE_DIR`
+- `SFTP_PASSWORD` (required if `SFTP_PRIVATE_KEY` is not set)
+- `SFTP_PRIVATE_KEY` (optional alternative to password authentication)
+
+> [!WARNING]
+> The deployment uses `mirror -R --delete`, so files in `SFTP_REMOTE_DIR` that are not present in this repository will be removed from the server.

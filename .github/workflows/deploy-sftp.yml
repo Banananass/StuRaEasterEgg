@@ -9,6 +9,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -23,11 +25,39 @@ jobs:
           SFTP_PORT: ${{ secrets.SFTP_PORT }}
           SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
           SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SFTP_PRIVATE_KEY: ${{ secrets.SFTP_PRIVATE_KEY }}
           SFTP_REMOTE_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
         run: |
-          lftp -c "
-          set sftp:auto-confirm yes;
-          open -u ${SFTP_USERNAME},${SFTP_PASSWORD} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST};
-          mirror -R --delete --verbose --exclude-glob .git* --exclude-glob .github . ${SFTP_REMOTE_DIR};
-          bye
-          "
+          required_vars=(SFTP_HOST SFTP_USERNAME SFTP_REMOTE_DIR)
+          for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+              echo "::error::Missing required secret: ${var}"
+              exit 1
+            fi
+          done
+
+          if [ -z "${SFTP_PASSWORD}" ] && [ -z "${SFTP_PRIVATE_KEY}" ]; then
+            echo "::error::Set either SFTP_PASSWORD or SFTP_PRIVATE_KEY"
+            exit 1
+          fi
+
+          lftp_script="${RUNNER_TEMP}/deploy.lftp"
+          {
+            echo "set cmd:fail-exit yes"
+            echo "set sftp:auto-confirm yes"
+
+            if [ -n "${SFTP_PRIVATE_KEY}" ]; then
+              key_file="${RUNNER_TEMP}/sftp_key"
+              printf '%s\n' "${SFTP_PRIVATE_KEY}" > "${key_file}"
+              chmod 600 "${key_file}"
+              echo "set sftp:connect-program \"ssh -a -x -i ${key_file}\""
+              echo "open -u ${SFTP_USERNAME}, -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
+            else
+              echo "open -u ${SFTP_USERNAME},${SFTP_PASSWORD} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
+            fi
+
+            echo "mirror -R --delete --verbose --exclude-glob .git* --exclude-glob .github . ${SFTP_REMOTE_DIR}"
+            echo "bye"
+          } > "${lftp_script}"
+
+          lftp -f "${lftp_script}"
