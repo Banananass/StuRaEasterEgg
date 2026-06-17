@@ -28,6 +28,8 @@ jobs:
           SFTP_PRIVATE_KEY: ${{ secrets.SFTP_PRIVATE_KEY }}
           SFTP_REMOTE_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
         run: |
+          set -euo pipefail
+
           required_vars=(SFTP_HOST SFTP_USERNAME SFTP_REMOTE_DIR)
           for var in "${required_vars[@]}"; do
             if [ -z "${!var}" ]; then
@@ -55,7 +57,7 @@ jobs:
           }
           trap cleanup EXIT
 
-          exclude_globs=(.git* .github .env* .npmrc *.pem id_rsa* id_ed25519*)
+          exclude_globs=(.git* .github .env* .npmrc *.pem *.key *.p12 *.pfx id_rsa* id_ed25519* credentials* secrets* .aws)
           mirror_cmd="mirror -R --delete --verbose"
           for pattern in "${exclude_globs[@]}"; do
             mirror_cmd="${mirror_cmd} --exclude-glob ${pattern}"
