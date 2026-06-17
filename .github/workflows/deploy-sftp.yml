@@ -75,7 +75,8 @@ jobs:
               echo "set sftp:connect-program \"ssh -a -x -i ${key_file}\""
               echo "open sftp://${SFTP_USERNAME}@${SFTP_HOST}:${SFTP_PORT:-22}"
             else
-              echo "open sftp://${SFTP_USERNAME}:${SFTP_PASSWORD}@${SFTP_HOST}:${SFTP_PORT:-22}"
+              echo "open sftp://${SFTP_HOST}:${SFTP_PORT:-22}"
+              echo "user ${SFTP_USERNAME} ${SFTP_PASSWORD}"
             fi
 
             echo "${mirror_cmd}"
