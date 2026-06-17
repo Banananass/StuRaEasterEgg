@@ -67,7 +67,7 @@ jobs:
             echo "set sftp:auto-confirm yes"
 
             if [ -n "${SFTP_PRIVATE_KEY}" ]; then
-              key_file="${RUNNER_TEMP}/sftp_key"
+              key_file="$(mktemp "${RUNNER_TEMP}/sftp_key.XXXXXX")"
               printf '%s\n' "${SFTP_PRIVATE_KEY}" > "${key_file}"
               chmod 600 "${key_file}"
               echo "set sftp:connect-program \"ssh -a -x -i ${key_file}\""
