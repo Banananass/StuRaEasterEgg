@@ -16,4 +16,4 @@ Configure these repository secrets in GitHub before running deployments:
 - `SFTP_PRIVATE_KEY` (optional alternative to password authentication)
 
 > [!WARNING]
-> The deployment uses `mirror -R --delete`, so files in `SFTP_REMOTE_DIR` that are not present in this repository will be removed from the server.
+> The deployment uses `mirror -R --delete`, so files in `SFTP_REMOTE_DIR` that are not present in this repository will be removed from the server (including files created manually on the server). On first deployment to a non-empty directory, anything not tracked in this repository is deleted. Use a staging directory first if you need a safer rollout.
