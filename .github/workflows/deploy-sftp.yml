@@ -51,12 +51,12 @@ jobs:
               printf '%s\n' "${SFTP_PRIVATE_KEY}" > "${key_file}"
               chmod 600 "${key_file}"
               echo "set sftp:connect-program \"ssh -a -x -i ${key_file}\""
-              echo "open -u ${SFTP_USERNAME}, -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
+              echo "open -u ${SFTP_USERNAME} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
             else
               echo "open -u ${SFTP_USERNAME},${SFTP_PASSWORD} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
             fi
 
-            echo "mirror -R --delete --verbose --exclude-glob .git* --exclude-glob .github . ${SFTP_REMOTE_DIR}"
+            echo "mirror -R --delete --verbose --exclude-glob .git* --exclude-glob .github --exclude-glob .env* --exclude-glob .npmrc . ${SFTP_REMOTE_DIR}"
             echo "bye"
           } > "${lftp_script}"
 
