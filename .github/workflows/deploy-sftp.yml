@@ -42,6 +42,14 @@ jobs:
           fi
 
           lftp_script="${RUNNER_TEMP}/deploy.lftp"
+          key_file=""
+
+          cleanup() {
+            [ -n "${key_file}" ] && rm -f "${key_file}"
+            rm -f "${lftp_script}"
+          }
+          trap cleanup EXIT
+
           {
             echo "set cmd:fail-exit yes"
             echo "set sftp:auto-confirm yes"
@@ -56,7 +64,7 @@ jobs:
               echo "open -u ${SFTP_USERNAME},${SFTP_PASSWORD} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
             fi
 
-            echo "mirror -R --delete --verbose --exclude-glob .git* --exclude-glob .github --exclude-glob .env* --exclude-glob .npmrc . ${SFTP_REMOTE_DIR}"
+            echo "mirror -R --delete --verbose --exclude-glob .git* --exclude-glob .github --exclude-glob .env* --exclude-glob .npmrc --exclude-glob *.pem --exclude-glob id_rsa* --exclude-glob id_ed25519* . ${SFTP_REMOTE_DIR}"
             echo "bye"
           } > "${lftp_script}"
 
