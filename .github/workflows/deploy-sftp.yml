@@ -41,6 +41,7 @@ jobs:
             exit 1
           fi
 
+          umask 077
           lftp_script="${RUNNER_TEMP}/deploy.lftp"
           key_file=""
 
@@ -68,4 +69,5 @@ jobs:
             echo "bye"
           } > "${lftp_script}"
 
+          chmod 600 "${lftp_script}"
           lftp -f "${lftp_script}"
