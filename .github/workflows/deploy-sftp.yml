@@ -46,10 +46,21 @@ jobs:
           key_file=""
 
           cleanup() {
-            [ -n "${key_file}" ] && rm -f "${key_file}"
-            rm -f "${lftp_script}"
+            if [ -n "${key_file}" ] && [ -e "${key_file}" ] && ! rm "${key_file}"; then
+              echo "::warning::Failed to remove temporary SSH key file"
+            fi
+            if [ -e "${lftp_script}" ] && ! rm "${lftp_script}"; then
+              echo "::warning::Failed to remove temporary lftp script"
+            fi
           }
           trap cleanup EXIT
+
+          exclude_globs=(.git* .github .env* .npmrc *.pem id_rsa* id_ed25519*)
+          mirror_cmd="mirror -R --delete --verbose"
+          for pattern in "${exclude_globs[@]}"; do
+            mirror_cmd="${mirror_cmd} --exclude-glob ${pattern}"
+          done
+          mirror_cmd="${mirror_cmd} . ${SFTP_REMOTE_DIR}"
 
           {
             echo "set cmd:fail-exit yes"
@@ -65,7 +76,7 @@ jobs:
               echo "open -u ${SFTP_USERNAME},${SFTP_PASSWORD} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
             fi
 
-            echo "mirror -R --delete --verbose --exclude-glob .git* --exclude-glob .github --exclude-glob .env* --exclude-glob .npmrc --exclude-glob *.pem --exclude-glob id_rsa* --exclude-glob id_ed25519* . ${SFTP_REMOTE_DIR}"
+            echo "${mirror_cmd}"
             echo "bye"
           } > "${lftp_script}"
 
