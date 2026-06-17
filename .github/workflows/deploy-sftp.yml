@@ -30,6 +30,15 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Strip carriage returns and newlines from single-line secrets to guard
+          # against accidentally stored secrets that contain embedded line breaks,
+          # which would split lftp script lines and produce "Unknown command" errors.
+          SFTP_HOST=$(tr -d '\r\n' <<< "${SFTP_HOST}")
+          SFTP_PORT=$(tr -d '\r\n' <<< "${SFTP_PORT}")
+          SFTP_USERNAME=$(tr -d '\r\n' <<< "${SFTP_USERNAME}")
+          SFTP_PASSWORD=$(tr -d '\r\n' <<< "${SFTP_PASSWORD}")
+          SFTP_REMOTE_DIR=$(tr -d '\r\n' <<< "${SFTP_REMOTE_DIR}")
+
           required_vars=(SFTP_HOST SFTP_USERNAME SFTP_REMOTE_DIR)
           for var in "${required_vars[@]}"; do
             if [ -z "${!var}" ]; then
@@ -57,7 +66,15 @@ jobs:
           }
           trap cleanup EXIT
 
-          exclude_globs=(.git* .github .env* .npmrc *.pem *.key *.p12 *.pfx id_rsa* id_ed25519* credentials* secrets* .aws)
+          lftp_escape() {
+            local value="${1//\'/\'\\\'\'}"
+            printf "'%s'" "${value}"
+          }
+
+          # Quote each pattern to prevent bash from glob-expanding the array
+          # elements against the checkout directory (e.g. .git* → .git .github
+          # .gitignore), which would break the intended exclude patterns.
+          exclude_globs=('.git*' '.github' '.env*' '.npmrc' '*.pem' '*.key' '*.p12' '*.pfx' 'id_rsa*' 'id_ed25519*' 'credentials*' 'secrets*' '.aws')
           mirror_cmd="mirror -R --delete --verbose"
           for pattern in "${exclude_globs[@]}"; do
             mirror_cmd="${mirror_cmd} --exclude-glob ${pattern}"
@@ -73,9 +90,12 @@ jobs:
               printf '%s\n' "${SFTP_PRIVATE_KEY}" > "${key_file}"
               chmod 600 "${key_file}"
               echo "set sftp:connect-program \"ssh -a -x -i ${key_file}\""
-              echo "open -u ${SFTP_USERNAME} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
+              echo "open sftp://${SFTP_USERNAME}@${SFTP_HOST}:${SFTP_PORT:-22}"
             else
-              echo "open -u ${SFTP_USERNAME},${SFTP_PASSWORD} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
+              echo "open sftp://${SFTP_HOST}:${SFTP_PORT:-22}"
+              escaped_username="$(lftp_escape "${SFTP_USERNAME}")"
+              escaped_password="$(lftp_escape "${SFTP_PASSWORD}")"
+              printf 'user %s %s\n' "${escaped_username}" "${escaped_password}"
             fi
 
             echo "${mirror_cmd}"
