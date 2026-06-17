@@ -73,9 +73,9 @@ jobs:
               printf '%s\n' "${SFTP_PRIVATE_KEY}" > "${key_file}"
               chmod 600 "${key_file}"
               echo "set sftp:connect-program \"ssh -a -x -i ${key_file}\""
-              echo "open -u ${SFTP_USERNAME} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
+              echo "open sftp://${SFTP_USERNAME}@${SFTP_HOST}:${SFTP_PORT:-22}"
             else
-              echo "open -u ${SFTP_USERNAME},${SFTP_PASSWORD} -p ${SFTP_PORT:-22} sftp://${SFTP_HOST}"
+              echo "open sftp://${SFTP_USERNAME}:${SFTP_PASSWORD}@${SFTP_HOST}:${SFTP_PORT:-22}"
             fi
 
             echo "${mirror_cmd}"
