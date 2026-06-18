@@ -1,0 +1,77 @@
+import {GameObject} from './Engine/GameObject.js';
+import {Engine} from './Engine/Engine.js';
+
+const PARTICLE_COUNT: number = 20;
+const GRAVITY: number = 0.12;  // px / frame²
+const FADE_SPEED: number = 0.022;
+const RADIUS: number = 4;
+
+interface Particle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    alpha: number;
+    color: string;
+}
+
+/**
+ * ParticleSystem – one-shot burst of colored circles.
+ * Destroys itself automatically when all particles have faded out.
+ */
+export class ParticleSystem extends GameObject {
+    public particles: Particle[];
+
+    constructor(engine: Engine, x: number, y: number) {
+        super(engine);
+        this.position.x = x;
+        this.position.y = y;
+        this.particles = [];
+        this.layer = 3;
+    }
+
+    override start(): void {
+        for (let i: number = 0; i < PARTICLE_COUNT; i++) {
+            const angle: number = Math.random() * Math.PI * 2;
+            const speed: number = 1 + Math.random() * 4;
+
+            this.particles.push({
+                x: this.position.x,
+                y: this.position.y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                alpha: 1,
+                color: `hsl(${Math.random() * 60 + 280}, 90%, 60%)`,
+            });
+        }
+    }
+
+    override update(dt: number): void {
+        for (const p of this.particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += GRAVITY;
+            p.alpha = Math.max(0, p.alpha - FADE_SPEED);
+        }
+
+        this.particles = this.particles.filter((p: Particle) => p.alpha > 0);
+
+        if (this.particles.length === 0) {
+            this.destroy();
+        }
+    }
+
+    /** @param {CanvasRenderingContext2D} ctx */
+    override draw(ctx: CanvasRenderingContext2D): void {
+        for (const p of this.particles) {
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+}
+

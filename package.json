@@ -1,0 +1,26 @@
+{
+  "name": "sturaeasteregg",
+  "version": "1.0.0",
+  "description": "This repository deploys automatically to an SFTP server using GitHub Actions.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Banananass/StuRaEasterEgg.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Banananass/StuRaEasterEgg/issues"
+  },
+  "homepage": "https://github.com/Banananass/StuRaEasterEgg#readme",
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}
