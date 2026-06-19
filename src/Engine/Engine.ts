@@ -10,6 +10,8 @@
  */
 import {GameObject} from "./GameObject.js";
 import {fixedUpdatePerSecond, maxFrameTime, virtualHeight, virtualWidth} from "../../config.js";
+import {Coroutine} from "./Coroutine.js";
+import {Time} from "./Time.js";
 
 export class Engine {
 
@@ -17,6 +19,7 @@ export class Engine {
     private readonly _ctx: CanvasRenderingContext2D;
     private readonly objects: Set<GameObject> = new Set<GameObject>();
     private readonly pendingAdd: Set<GameObject> = new Set<GameObject>();
+    private readonly activeCoroutines: Set<{ coroutine: Coroutine, owner?: GameObject }> = new Set();
 
     private lastTime: number = 0;
     private fixedAccumulator: number = 0;
@@ -25,7 +28,9 @@ export class Engine {
 
     public backgroundColor: string;
 
-    constructor(canvasId: string) {
+    private static instance: Engine;
+
+    private constructor(canvasId: string) {
         this._canvas = document.getElementById(canvasId) as HTMLCanvasElement;
         this._ctx = this._canvas.getContext('2d') as CanvasRenderingContext2D;
         this.backgroundColor = '#888';
@@ -34,14 +39,16 @@ export class Engine {
         window.addEventListener('resize', () => this.resize());
     }
 
-    // ── Public getters ──────────────────────────────────────────────────────
-
     get canvas(): HTMLCanvasElement {
         return this._canvas;
     }
 
     get ctx(): CanvasRenderingContext2D {
         return this._ctx;
+    }
+
+    public static get Instance(): Engine {
+        return this.instance || (this.instance = new this('c'));
     }
 
     // ── Object management ───────────────────────────────────────────────────
@@ -61,6 +68,42 @@ export class Engine {
     public removeObject(go: GameObject): void {
         this.objects.delete(go);
         this.pendingAdd.delete(go);
+    }
+
+    // ── Coroutines ──────────────────────────────────────────────────────────
+
+    /**
+     * Start a coroutine associated with the engine (globally or on behalf of a GameObject).
+     * Runs immediately up to its first yield statement.
+     */
+    public startCoroutine(routine: Generator<any, any, any>, owner?: GameObject): Coroutine {
+        const coroutine = new Coroutine(routine);
+
+        // Run first step synchronously
+        const running = coroutine.update(0);
+        if (running) {
+            this.activeCoroutines.add({coroutine, owner});
+        }
+        return coroutine;
+    }
+
+    public stopCoroutine(coroutine: Coroutine): void {
+        for (const entry of this.activeCoroutines) {
+            if (entry.coroutine === coroutine) {
+                coroutine.stop();
+                this.activeCoroutines.delete(entry);
+                break;
+            }
+        }
+    }
+
+    public stopAllCoroutines(owner?: GameObject): void {
+        for (const entry of this.activeCoroutines) {
+            if (owner === undefined || entry.owner === owner) {
+                entry.coroutine.stop();
+                this.activeCoroutines.delete(entry);
+            }
+        }
     }
 
     // ── Lifecycle ───────────────────────────────────────────────────────────
@@ -94,7 +137,32 @@ export class Engine {
         const dt: number = Math.min(ts - this.lastTime, maxFrameTime);
         this.lastTime = ts;
 
-        // ── Fixed update (50 fps) ──────────────────────────────────────────
+        // Update global Time metrics
+        Time.update(dt);
+
+        // ── Update Coroutines ──────────────────────────────────────────────
+        const coroutinesToUpdate = [...this.activeCoroutines];
+        for (const entry of coroutinesToUpdate) {
+            if (!this.activeCoroutines.has(entry)) continue;
+
+            const owner = entry.owner;
+            if (owner && owner.Destroyed) {
+                entry.coroutine.stop();
+                this.activeCoroutines.delete(entry);
+                continue;
+            }
+
+            if (owner && !owner.enabled) {
+                continue;
+            }
+
+            const running = entry.coroutine.update(dt);
+            if (!running) {
+                this.activeCoroutines.delete(entry);
+            }
+        }
+
+        // ── Fixed update ──────────────────────────────────────────
         this.fixedAccumulator += dt;
         while (this.fixedAccumulator >= this.fixedDt) {
             for (const go of this.objects)
@@ -108,7 +176,7 @@ export class Engine {
 
         // ── Update + draw (snapshot so mid-frame removals are safe) ────────
         const snapshot: GameObject[] = [...this.objects];
-        for (const go of snapshot) if (!go.Destroyed && go.enabled) go.update(dt);
+        for (const go of snapshot) if (!go.Destroyed && go.enabled) go.update();
 
         // Sort by layer ascending so that higher layers are rendered on top
         const renderSnapshot: GameObject[] = snapshot

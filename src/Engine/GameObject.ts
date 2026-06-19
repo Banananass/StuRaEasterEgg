@@ -1,11 +1,11 @@
 import {Engine} from "./Engine.js";
 import {Vector2} from "./Vector2.js";
+import {Coroutine} from "./Coroutine.js";
 
 /**
  * GameObject – Base class for all game entities.
  */
 export abstract class GameObject {
-    private readonly engine: Engine;
     private destroyed: boolean;
     public enabled: boolean;
 
@@ -18,12 +18,7 @@ export abstract class GameObject {
         return this.destroyed;
     }
 
-    get Engine(): Engine {
-        return this.engine;
-    }
-
-    constructor(engine: Engine) {
-        this.engine = engine;
+    constructor() {
         this.destroyed = false;
         this.enabled = true;
         this.position = new Vector2(0, 0);
@@ -31,7 +26,7 @@ export abstract class GameObject {
         this.scale = new Vector2(1, 1);
         this.layer = 0;
         this.awake();
-        this.engine.addObject(this);
+        Engine.Instance.addObject(this);
     }
 
     /** Called on object creation. */
@@ -44,9 +39,8 @@ export abstract class GameObject {
 
     /**
      * Called every rendered frame.
-     * @param dt – elapsed milliseconds since the last frame
      */
-    update(dt: number): void {
+    update(): void {
     }
 
     /** Called at a fixed 50 fps rate (every 20 ms). */
@@ -60,10 +54,30 @@ export abstract class GameObject {
     draw(ctx: CanvasRenderingContext2D): void {
     }
 
+    // ── Coroutines (Unity-like) ──────────────────────────────────────────────
+
+    /**
+     * Start a coroutine bound to this GameObject.
+     * The coroutine will automatically pause when this object is disabled,
+     * and terminate when this object is destroyed.
+     */
+    public startCoroutine(routine: Generator<any, any, any>): Coroutine {
+        return Engine.Instance.startCoroutine(routine, this);
+    }
+
+    public stopCoroutine(coroutine: Coroutine): void {
+        Engine.Instance.stopCoroutine(coroutine);
+    }
+
+    public stopAllCoroutines(): void {
+        Engine.Instance.stopAllCoroutines(this);
+    }
+
     /** Remove this object from the engine. */
     destroy(): void {
         this.destroyed = true;
-        this.engine.removeObject(this);
+        this.stopAllCoroutines();
+        Engine.Instance.removeObject(this);
     }
 }
 

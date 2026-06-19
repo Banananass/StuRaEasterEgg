@@ -4,13 +4,13 @@ const GRAVITY = 0.12; // px / frame²
 const FADE_SPEED = 0.022;
 const RADIUS = 4;
 /**
- * ParticleSystem – one-shot burst of coloured circles.
+ * ParticleSystem – one-shot burst of colored circles.
  * Destroys itself automatically when all particles have faded out.
  */
 export class ParticleSystem extends GameObject {
     particles;
-    constructor(engine, x, y) {
-        super(engine);
+    constructor(x, y) {
+        super();
         this.position.x = x;
         this.position.y = y;
         this.particles = [];
@@ -30,7 +30,7 @@ export class ParticleSystem extends GameObject {
             });
         }
     }
-    update(dt) {
+    update() {
         for (const p of this.particles) {
             p.x += p.vx;
             p.y += p.vy;

@@ -6,6 +6,7 @@ export class ScoreManager {
     _score;
     _scoreEl;
     _boardEl;
+    static instance;
     constructor() {
         this._score = 0;
         this._scoreEl = document.getElementById('score');
@@ -13,6 +14,9 @@ export class ScoreManager {
     }
     get score() {
         return this._score;
+    }
+    static get Instance() {
+        return this.instance || (this.instance = new this());
     }
     /**
      * Increase the score by `amount` and refresh the DOM.

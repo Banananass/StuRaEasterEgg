@@ -27,7 +27,7 @@ Das Spiel läuft auf einer kleinen, proprietären Game-Engine, die Ähnlichkeite
 ```text
 StuRaEasterEgg/
 ├── config.ts              # Globale Spieleinstellungen (Auflösung, Tickrate, FPS-Limit)
-├── index.php              # PHP/HTML-Einstiegspunkt; bindet das Stylesheet und gameLoop.js ein
+├── index.php              # PHP/HTML-Einstiegspunkt; bindet das Stylesheet und Main.js ein
 ├── package.json           # Node.js-Konfiguration für Skripte und TypeScript-Abhängigkeiten
 ├── tsconfig.json          # TypeScript-Compiler-Konfiguration
 │
@@ -44,7 +44,7 @@ StuRaEasterEgg/
         ├── Engine.ts      # Core Game Loop & Renderer (requestAnimationFrame)
         ├── GameObject.ts  # Abstrakte Spielobjekt-Klasse mit Transform- & Lifecycle-Eigenschaften
         ├── InputManager.ts# Globale Eingabeerfassung (Maus-zu-Canvas-Mapping)
-        └── gameLoop.ts    # Bootstrap-Einstiegspunkt; initialisiert Engine und Start-Objekte
+        └── Main.ts    # Bootstrap-Einstiegspunkt; initialisiert Engine und Start-Objekte
 ```
 
 > **Hinweis:** Bearbeite bitte ausschließlich die `.ts`-Dateien im `src/`-Ordner (und `config.ts`). Die `.js`- und `.js.map`-Dateien werden durch den Build-Prozess automatisch generiert und überschrieben.

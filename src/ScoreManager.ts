@@ -7,14 +7,20 @@ export class ScoreManager {
     private readonly _scoreEl: HTMLElement;
     private readonly _boardEl: HTMLElement;
 
-    constructor() {
+    private static instance: ScoreManager;
+
+    private constructor() {
         this._score = 0;
         this._scoreEl = document.getElementById('score') as HTMLElement;
         this._boardEl = document.getElementById('score-board') as HTMLElement;
     }
 
-    get score(): number {
+    public get score(): number {
         return this._score;
+    }
+
+    public static get Instance(): ScoreManager{
+        return this.instance || (this.instance = new this());
     }
 
     /**

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EasterEgg</title>
     <link rel="stylesheet" href="style/style.css">
-    <script type="module" src="src/Engine/gameLoop.js" defer></script>
+    <script type="module" src="Main.js" defer></script>
 </head>
 <body>
 

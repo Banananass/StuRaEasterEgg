@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Banananass/StuRaEasterEgg#readme",
   "devDependencies": {
+    "strongly-typed-events": "^3.0.11",
     "typescript": "^6.0.3"
   }
 }

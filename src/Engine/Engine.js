@@ -1,14 +1,18 @@
 import { fixedUpdatePerSecond, maxFrameTime, virtualHeight, virtualWidth } from "../../config.js";
+import { Coroutine } from "./Coroutine.js";
+import { Time } from "./Time.js";
 export class Engine {
     _canvas;
     _ctx;
     objects = new Set();
     pendingAdd = new Set();
+    activeCoroutines = new Set();
     lastTime = 0;
     fixedAccumulator = 0;
     fixedDt = 1000 / fixedUpdatePerSecond;
     running = false;
     backgroundColor;
+    static instance;
     constructor(canvasId) {
         this._canvas = document.getElementById(canvasId);
         this._ctx = this._canvas.getContext('2d');
@@ -16,12 +20,14 @@ export class Engine {
         this.resize();
         window.addEventListener('resize', () => this.resize());
     }
-    // ── Public getters ──────────────────────────────────────────────────────
     get canvas() {
         return this._canvas;
     }
     get ctx() {
         return this._ctx;
+    }
+    static get Instance() {
+        return this.instance || (this.instance = new this('c'));
     }
     // ── Object management ───────────────────────────────────────────────────
     /**
@@ -39,6 +45,37 @@ export class Engine {
     removeObject(go) {
         this.objects.delete(go);
         this.pendingAdd.delete(go);
+    }
+    // ── Coroutines ──────────────────────────────────────────────────────────
+    /**
+     * Start a coroutine associated with the engine (globally or on behalf of a GameObject).
+     * Runs immediately up to its first yield statement.
+     */
+    startCoroutine(routine, owner) {
+        const coroutine = new Coroutine(routine);
+        // Run first step synchronously
+        const running = coroutine.update(0);
+        if (running) {
+            this.activeCoroutines.add({ coroutine, owner });
+        }
+        return coroutine;
+    }
+    stopCoroutine(coroutine) {
+        for (const entry of this.activeCoroutines) {
+            if (entry.coroutine === coroutine) {
+                coroutine.stop();
+                this.activeCoroutines.delete(entry);
+                break;
+            }
+        }
+    }
+    stopAllCoroutines(owner) {
+        for (const entry of this.activeCoroutines) {
+            if (owner === undefined || entry.owner === owner) {
+                entry.coroutine.stop();
+                this.activeCoroutines.delete(entry);
+            }
+        }
     }
     // ── Lifecycle ───────────────────────────────────────────────────────────
     /** Calls start() on all registered objects and begins the render loop. */
@@ -65,7 +102,28 @@ export class Engine {
         this.pendingAdd.clear();
         const dt = Math.min(ts - this.lastTime, maxFrameTime);
         this.lastTime = ts;
-        // ── Fixed update (50 fps) ──────────────────────────────────────────
+        // Update global Time metrics
+        Time.update(dt);
+        // ── Update Coroutines ──────────────────────────────────────────────
+        const coroutinesToUpdate = [...this.activeCoroutines];
+        for (const entry of coroutinesToUpdate) {
+            if (!this.activeCoroutines.has(entry))
+                continue;
+            const owner = entry.owner;
+            if (owner && owner.Destroyed) {
+                entry.coroutine.stop();
+                this.activeCoroutines.delete(entry);
+                continue;
+            }
+            if (owner && !owner.enabled) {
+                continue;
+            }
+            const running = entry.coroutine.update(dt);
+            if (!running) {
+                this.activeCoroutines.delete(entry);
+            }
+        }
+        // ── Fixed update ──────────────────────────────────────────
         this.fixedAccumulator += dt;
         while (this.fixedAccumulator >= this.fixedDt) {
             for (const go of this.objects)
@@ -80,7 +138,7 @@ export class Engine {
         const snapshot = [...this.objects];
         for (const go of snapshot)
             if (!go.Destroyed && go.enabled)
-                go.update(dt);
+                go.update();
         // Sort by layer ascending so that higher layers are rendered on top
         const renderSnapshot = snapshot
             .filter(go => !go.Destroyed && go.enabled)

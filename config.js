@@ -1,3 +1,4 @@
+// file for global engine config
 export const fixedUpdatePerSecond = 50;
 export const maxFrameTime = 64;
 export const virtualWidth = 1920;

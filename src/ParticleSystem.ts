@@ -1,5 +1,4 @@
 import {GameObject} from './Engine/GameObject.js';
-import {Engine} from './Engine/Engine.js';
 
 const PARTICLE_COUNT: number = 20;
 const GRAVITY: number = 0.12;  // px / frame²
@@ -22,8 +21,8 @@ interface Particle {
 export class ParticleSystem extends GameObject {
     public particles: Particle[];
 
-    constructor(engine: Engine, x: number, y: number) {
-        super(engine);
+    constructor(x: number, y: number) {
+        super();
         this.position.x = x;
         this.position.y = y;
         this.particles = [];
@@ -46,7 +45,7 @@ export class ParticleSystem extends GameObject {
         }
     }
 
-    override update(dt: number): void {
+    override update(): void {
         for (const p of this.particles) {
             p.x += p.vx;
             p.y += p.vy;
