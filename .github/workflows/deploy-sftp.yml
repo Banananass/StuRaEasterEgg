@@ -124,23 +124,18 @@ jobs:
             echo "${mirror_cmd}"
 
             # Set sane permissions: 755 for directories, 644 for files.
-            # IMPORTANT: do NOT chmod files to 755 (executable). Many shared
+            # IMPORTANT: do NOT make regular files executable. Many shared
             # hosts run PHP via suPHP/suexec, which refuses to execute PHP
             # scripts that have the group/world-executable bit set and
             # returns a generic "500 Internal Server Error" for them.
-            while IFS= read -r -d '' path; do
-              case "${path}" in
-                .git*|.github|.env*|.npmrc|*.pem|*.key|*.p12|*.pfx|id_rsa*|id_ed25519*|credentials*|secrets*|.aws)
-                  continue
-                  ;;
-              esac
-              remote_path="${SFTP_REMOTE_DIR%/}/${path#./}"
-              if [ -d "${path}" ]; then
-                echo "chmod 755 $(lftp_escape "${remote_path}")"
-              else
-                echo "chmod 644 $(lftp_escape "${remote_path}")"
-              fi
-            done < <(find . -mindepth 1 -print0)
+            #
+            # "u=rwX,go=rX" is the standard chmod idiom for this: the
+            # capital X only adds the executable bit for directories (or
+            # files that already have it set), never for plain files - so
+            # this is safe to run recursively over the actual remote tree
+            # in a single command, without having to reconstruct locally
+            # which files mirror did or didn't upload.
+            echo "chmod -R u=rwX,go=rX ${SFTP_REMOTE_DIR}"
 
             echo "bye"
           } > "${lftp_script}"
