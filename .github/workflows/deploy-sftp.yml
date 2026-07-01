@@ -60,7 +60,7 @@ jobs:
           mkdir -p "${STAGE}"
 
           # Top-level runtime files.
-          cp -p index.php test.php .htaccess "${STAGE}/"
+          cp -p index.php "${STAGE}/"
 
           # Static asset directories, copied as-is.
           cp -pr style "${STAGE}/"
