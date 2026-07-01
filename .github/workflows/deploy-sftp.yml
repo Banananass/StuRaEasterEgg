@@ -175,6 +175,7 @@ jobs:
             # in a single command, without having to reconstruct locally
             # which files mirror did or didn't upload.
             echo "chmod -R u=rwX,go=rX ${SFTP_REMOTE_DIR}"
+            echo "chmod 755 ${SFTP_REMOTE_DIR}/index.php"
 
             echo "bye"
           } > "${lftp_script}"
