@@ -15,6 +15,29 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Full history is needed so we can look up each tracked file's
+          # real last-commit timestamp in the next step (a shallow clone
+          # would make every file appear to have been "just changed").
+          fetch-depth: 0
+
+      - name: Restore file modification times from git history
+        # actions/checkout sets every file's mtime to "now" (the checkout
+        # time), since git itself does not store original commit
+        # timestamps. Without this step, lftp's mirror (which decides what
+        # to upload based on size/mtime) would see every single file as
+        # "newer" than what's on the server on every run, and re-upload the
+        # entire project each time instead of just the files that actually
+        # changed. Restoring each file's mtime to its last commit date lets
+        # lftp correctly skip files that are unchanged since the last
+        # deploy.
+        run: |
+          while IFS= read -r -d '' file; do
+            ts="$(git log -1 --format=%ct -- "$file" 2>/dev/null || true)"
+            if [ -n "$ts" ]; then
+              touch -d "@${ts}" "$file"
+            fi
+          done < <(git ls-files -z)
 
       - name: Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
@@ -99,6 +122,10 @@ jobs:
             fi
 
             echo "${mirror_cmd}"
+
+            # Set permissions to 755 for all directories and files
+            echo "chmod -R 755 ${SFTP_REMOTE_DIR}"
+
             echo "bye"
           } > "${lftp_script}"
 
