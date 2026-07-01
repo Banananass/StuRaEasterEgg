@@ -57,3 +57,274 @@ canvas {
 #collect-msg.show {
     opacity: 1;
 }
+
+/* --- UPGRADE SHOP --- */
+
+#upgrade-shop-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #ffcc00;
+    color: #111;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 28px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 1.15rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    z-index: 99;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s, transform 0.3s, background 0.2s, box-shadow 0.2s;
+    pointer-events: none;
+}
+
+#upgrade-shop-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+#upgrade-shop-btn:hover {
+    background: #ffe566;
+    box-shadow: 0 6px 20px rgba(255, 204, 0, 0.4);
+}
+
+#upgrade-shop-btn:active {
+    transform: scale(0.95);
+}
+
+#upgrade-shop-overlay {
+    position: fixed;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    background: rgba(15, 15, 20, 0.96);
+    border: 3px solid #ffcc00;
+    border-radius: 16px;
+    z-index: 100;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    display: none;
+    flex-direction: column;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+}
+
+.shop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 12px;
+}
+
+.shop-header h2 {
+    font-size: 1.8rem;
+    color: #ffcc00;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.shop-points-container {
+    font-size: 1.3rem;
+    font-weight: bold;
+    background: #222;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid #ffcc00;
+    user-select: none;
+}
+
+.shop-close-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 2.2rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.15s, transform 0.1s;
+}
+
+.shop-close-btn:hover {
+    color: #ff3333;
+    transform: scale(1.1);
+}
+
+#upgrade-shop-graph {
+    position: relative;
+    flex-grow: 1;
+    width: 100%;
+    background: #08080c;
+    border: 2px solid #222;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+}
+
+#upgrade-shop-graph:active {
+    cursor: grabbing;
+}
+
+#upgrade-shop-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+#upgrade-shop-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.connection-line {
+    stroke-linecap: round;
+    transition: stroke 0.3s, stroke-dasharray 0.3s;
+}
+
+.connection-line.revealed {
+    stroke: #ffcc00;
+    stroke-width: 4;
+    filter: drop-shadow(0 0 5px rgba(255, 204, 0, 0.4));
+}
+
+.connection-line.teased {
+    stroke: #444;
+    stroke-width: 3;
+    stroke-dasharray: 6 6;
+}
+
+#upgrade-shop-nodes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+.upgrade-node {
+    position: absolute;
+    width: 250px;
+    background: #15151e;
+    border: 2px solid #444;
+    border-radius: 10px;
+    padding: 16px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    user-select: none;
+}
+
+.upgrade-node.revealed {
+    border-color: #ffcc00;
+}
+
+.upgrade-node.revealed:hover {
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
+    background: #1c1c28;
+}
+
+.upgrade-node.teased {
+    background: rgba(10, 10, 15, 0.6);
+    border-color: #2a2a30;
+    color: #666;
+    border-style: dashed;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.node-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ffcc00;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 2px;
+}
+
+.upgrade-node.teased .node-title {
+    color: #555;
+    border-color: #222;
+}
+
+.node-desc {
+    font-size: 0.85rem;
+    color: #ccc;
+    line-height: 1.3;
+}
+
+.node-desc.teaser {
+    color: #888;
+    font-style: italic;
+}
+
+.node-level {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #00ffcc;
+}
+
+.node-max {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #ff3366;
+    text-align: center;
+    background: rgba(255, 51, 102, 0.15);
+    border: 1px solid #ff3366;
+    border-radius: 4px;
+    padding: 6px;
+    margin-top: 6px;
+}
+
+.node-buy-btn {
+    background: #ffcc00;
+    color: #111;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s, transform 0.1s;
+    margin-top: 4px;
+}
+
+.node-buy-btn:hover {
+    background: #ffe566;
+}
+
+.node-buy-btn:active {
+    transform: scale(0.97);
+}
+
+.node-buy-btn:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.node-icon {
+    font-size: 2rem;
+    color: #555;
+    margin-bottom: 4px;
+}

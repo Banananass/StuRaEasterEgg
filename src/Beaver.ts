@@ -3,24 +3,25 @@ import {input} from './Engine/InputManager.js';
 import {Engine} from './Engine/Engine.js';
 import {JuiceboxSpawner} from "./JuiceboxSpawner.js";
 import {Time} from "./Engine/Time.js";
+import {UpgradeShop} from "./UpgradeShop.js";
 
 const SIZE: number = 50;
 const ROTATION_LERP: number = 3;
 const MIN_MOVE_DIST: number = 2;
 
-const INITIAL_SPEED: number = 60;
+const INITIAL_SPEED: number = 100;
 const INITIAL_COLLECTION_RADIUS: number = 30;
 
 /**
  * Beaver – player-controlled character that follows the mouse cursor.
  */
 export class Beaver extends GameObject {
-    public speed: number = INITIAL_SPEED;
-    public collectionRadius: number = INITIAL_COLLECTION_RADIUS;
+    public static Instance: Beaver | null = null;
 
     private image!: HTMLImageElement;
 
     override start(): void {
+        Beaver.Instance = this;
         this.layer = 2;
         this.position.x = Engine.Instance.canvas.width / 2;
         this.position.y = Engine.Instance.canvas.height / 2;
@@ -29,6 +30,8 @@ export class Beaver extends GameObject {
     }
 
     override update(): void {
+        if (UpgradeShop.isOpen) return;
+
         const mouseX: number = input.mouse.x;
         const mouseY: number = input.mouse.y;
         this.moveTowardsMouse(mouseX, mouseY);
@@ -36,6 +39,7 @@ export class Beaver extends GameObject {
     }
 
     override fixedUpdate() {
+        if (UpgradeShop.isOpen) return;
         this.collectJuice();
     }
 
@@ -49,11 +53,11 @@ export class Beaver extends GameObject {
         ctx.restore();
     }
 
-    moveTowardsMouse(mouseX: number, mouseY: number): void {
+    private moveTowardsMouse(mouseX: number, mouseY: number): void {
         const dx: number = mouseX - this.position.x;
         const dy: number = mouseY - this.position.y;
         const dist: number = Math.hypot(dx, dy);
-        const adjustedSpeed: number = this.speed * Time.deltaTime;
+        const adjustedSpeed: number = this.Speed * Time.deltaTime;
 
         if (dist > adjustedSpeed) {
             this.position.x += (dx / dist) * adjustedSpeed;
@@ -64,7 +68,7 @@ export class Beaver extends GameObject {
         }
     }
 
-    rotateTowardsMouse(mouseX: number, mouseY: number): void {
+    private rotateTowardsMouse(mouseX: number, mouseY: number): void {
         const adx: number = mouseX - this.position.x;
         const ady: number = mouseY - this.position.y;
         const targetAngle: number = Math.hypot(adx, ady) > MIN_MOVE_DIST
@@ -76,7 +80,7 @@ export class Beaver extends GameObject {
         this.rotation += da * ROTATION_LERP * Time.deltaTime;
     }
 
-    collectJuice(): void {
+    private collectJuice(): void {
         for (const jb of JuiceboxSpawner.activeJuiceboxes) {
             if (jb.collected) continue;
 
@@ -85,8 +89,16 @@ export class Beaver extends GameObject {
                 jb.position.y - this.position.y
             );
 
-            if (juiceboxDist < this.collectionRadius) jb.startCollecting();
+            if (juiceboxDist < this.CollectionRadius) jb.startCollecting();
             else jb.stopCollecting();
         }
+    }
+
+    private get Speed(): number{
+        return INITIAL_SPEED + UpgradeShop.getUpgradeLevel('speed') * 25;
+    }
+
+    private get CollectionRadius(): number{
+        return INITIAL_COLLECTION_RADIUS + UpgradeShop.getUpgradeLevel('radius') * 15;
     }
 }

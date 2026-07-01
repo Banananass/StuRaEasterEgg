@@ -3,19 +3,20 @@ import { input } from './Engine/InputManager.js';
 import { Engine } from './Engine/Engine.js';
 import { JuiceboxSpawner } from "./JuiceboxSpawner.js";
 import { Time } from "./Engine/Time.js";
+import { UpgradeShop } from "./UpgradeShop.js";
 const SIZE = 50;
 const ROTATION_LERP = 3;
 const MIN_MOVE_DIST = 2;
-const INITIAL_SPEED = 60;
+const INITIAL_SPEED = 100;
 const INITIAL_COLLECTION_RADIUS = 30;
 /**
  * Beaver – player-controlled character that follows the mouse cursor.
  */
 export class Beaver extends GameObject {
-    speed = INITIAL_SPEED;
-    collectionRadius = INITIAL_COLLECTION_RADIUS;
+    static Instance = null;
     image;
     start() {
+        Beaver.Instance = this;
         this.layer = 2;
         this.position.x = Engine.Instance.canvas.width / 2;
         this.position.y = Engine.Instance.canvas.height / 2;
@@ -23,12 +24,16 @@ export class Beaver extends GameObject {
         this.image.src = 'resources/beaver.png';
     }
     update() {
+        if (UpgradeShop.isOpen)
+            return;
         const mouseX = input.mouse.x;
         const mouseY = input.mouse.y;
         this.moveTowardsMouse(mouseX, mouseY);
         this.rotateTowardsMouse(mouseX, mouseY);
     }
     fixedUpdate() {
+        if (UpgradeShop.isOpen)
+            return;
         this.collectJuice();
     }
     /** @param {CanvasRenderingContext2D} ctx */
@@ -44,7 +49,7 @@ export class Beaver extends GameObject {
         const dx = mouseX - this.position.x;
         const dy = mouseY - this.position.y;
         const dist = Math.hypot(dx, dy);
-        const adjustedSpeed = this.speed * Time.deltaTime;
+        const adjustedSpeed = this.Speed * Time.deltaTime;
         if (dist > adjustedSpeed) {
             this.position.x += (dx / dist) * adjustedSpeed;
             this.position.y += (dy / dist) * adjustedSpeed;
@@ -72,11 +77,17 @@ export class Beaver extends GameObject {
             if (jb.collected)
                 continue;
             const juiceboxDist = Math.hypot(jb.position.x - this.position.x, jb.position.y - this.position.y);
-            if (juiceboxDist < this.collectionRadius)
+            if (juiceboxDist < this.CollectionRadius)
                 jb.startCollecting();
             else
                 jb.stopCollecting();
         }
+    }
+    get Speed() {
+        return INITIAL_SPEED + UpgradeShop.getUpgradeLevel('speed') * 25;
+    }
+    get CollectionRadius() {
+        return INITIAL_COLLECTION_RADIUS + UpgradeShop.getUpgradeLevel('radius') * 15;
     }
 }
 //# sourceMappingURL=Beaver.js.map

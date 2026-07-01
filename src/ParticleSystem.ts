@@ -20,13 +20,15 @@ interface Particle {
  */
 export class ParticleSystem extends GameObject {
     public particles: Particle[];
+    private colorTheme: 'gold' | 'normal';
 
-    constructor(x: number, y: number) {
+    constructor(x: number, y: number, colorTheme: 'gold' | 'normal' = 'normal') {
         super();
         this.position.x = x;
         this.position.y = y;
         this.particles = [];
         this.layer = 3;
+        this.colorTheme = colorTheme;
     }
 
     override start(): void {
@@ -34,13 +36,17 @@ export class ParticleSystem extends GameObject {
             const angle: number = Math.random() * Math.PI * 2;
             const speed: number = 1 + Math.random() * 4;
 
+            const hue = this.colorTheme === 'gold'
+                ? Math.random() * 15 + 42  // 42 to 57 is warm gold/yellow
+                : Math.random() * 60 + 280; // 280 to 340 is purple/magenta
+
             this.particles.push({
                 x: this.position.x,
                 y: this.position.y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 alpha: 1,
-                color: `hsl(${Math.random() * 60 + 280}, 90%, 60%)`,
+                color: `hsl(${hue}, 95%, 55%)`,
             });
         }
     }
