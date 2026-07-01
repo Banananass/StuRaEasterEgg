@@ -39,6 +39,44 @@ jobs:
             fi
           done < <(git ls-files -z)
 
+      - name: Build deploy staging directory
+        # Only assemble the files that actually need to end up on the web
+        # server, instead of mirroring the whole git working tree and then
+        # trying to hide the rest with .htaccess rules / lftp excludes
+        # (which is fragile - see git history of this workflow). This also
+        # means:
+        #  - .git/.github/node_modules never even exist in the staging dir,
+        #    so they can never accidentally get uploaded.
+        #  - .ts sources and .js.map sourcemaps are left out on purpose:
+        #    the browser only ever loads the compiled .js files (see the
+        #    imports in Main.ts), so the TypeScript sources and sourcemaps
+        #    are build-time-only artifacts and serve no purpose on the
+        #    server (they'd just be dead weight / unnecessarily expose
+        #    source structure).
+        run: |
+          set -euo pipefail
+          STAGE="${RUNNER_TEMP}/deploy"
+          rm -rf "${STAGE}"
+          mkdir -p "${STAGE}"
+
+          # Top-level runtime files.
+          cp -p index.php .htaccess "${STAGE}/"
+
+          # Static asset directories, copied as-is.
+          cp -pr style "${STAGE}/"
+          cp -pr resources "${STAGE}/"
+
+          # Only compiled JavaScript, preserving directory structure,
+          # skipping .ts sources, .map sourcemaps and node_modules.
+          while IFS= read -r -d '' jsfile; do
+            rel="${jsfile#./}"
+            mkdir -p "${STAGE}/$(dirname "${rel}")"
+            cp -p "${jsfile}" "${STAGE}/${rel}"
+          done < <(find . -path './node_modules' -prune -o -name '*.js' -print0)
+
+          echo "Staged files:"
+          find "${STAGE}" -type f | sort
+
       - name: Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
 
@@ -52,6 +90,7 @@ jobs:
           SFTP_REMOTE_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
         run: |
           set -euo pipefail
+          STAGE="${RUNNER_TEMP}/deploy"
 
           # Strip carriage returns and newlines from single-line secrets to guard
           # against accidentally stored secrets that contain embedded line breaks,
@@ -97,12 +136,12 @@ jobs:
           # Quote each pattern to prevent bash from glob-expanding the array
           # elements against the checkout directory (e.g. .git* → .git .github
           # .gitignore), which would break the intended exclude patterns.
-          exclude_globs=('.git*' '.github' '.env*' '.npmrc' '*.pem' '*.key' '*.p12' '*.pfx' 'id_rsa*' 'id_ed25519*' 'credentials*' 'secrets*' '.aws')
+          exclude_globs=('.env*' '.npmrc' '*.pem' '*.key' '*.p12' '*.pfx' 'id_rsa*' 'id_ed25519*' 'credentials*' 'secrets*' '.aws')
           mirror_cmd="mirror -R --delete --verbose"
           for pattern in "${exclude_globs[@]}"; do
             mirror_cmd="${mirror_cmd} --exclude-glob ${pattern}"
           done
-          mirror_cmd="${mirror_cmd} . ${SFTP_REMOTE_DIR}"
+          mirror_cmd="${mirror_cmd} ${STAGE} ${SFTP_REMOTE_DIR}"
 
           {
             echo "set cmd:fail-exit yes"

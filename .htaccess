@@ -1,66 +1,23 @@
 # ------------------------------------------------------------------
 # .htaccess for StuRaEasterEgg
 #
-# Goal: Only "index.php" may be requested directly by the browser.
-# All other project/source files (TypeScript sources, source maps,
-# config/build files, dotfiles, VCS metadata, etc.) are blocked from
-# direct access. Static assets that the page itself needs to load
-# (JS, CSS, images referenced by index.php) remain accessible, since
-# the browser must be able to fetch them as separate requests.
+# Kept intentionally minimal: the deploy workflow now only uploads the
+# files that are actually needed at runtime (index.php, .htaccess,
+# style/, resources/, compiled .js files). There is no .ts source, no
+# .git, no config/build metadata on the server anymore, so there is
+# nothing sensitive left to hide via rewrite/require rules.
+#
+# Directives like "Options", "RewriteEngine", "Require" and
+# "Order/Deny" are disabled via AllowOverride on many shared hosts.
+# When that's the case, using them here causes a hard 500 Internal
+# Server Error - regardless of any <IfModule> guard, since that only
+# checks whether a module is loaded, not whether AllowOverride permits
+# the directive. Keeping this file to just "DirectoryIndex" avoids
+# that failure mode entirely. If you still get a 500 with just this
+# line, rename/remove .htaccess via SFTP to confirm whether it's the
+# cause at all.
 # ------------------------------------------------------------------
 
 DirectoryIndex index.php
-Options -Indexes -MultiViews
-
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-
-    # Let requests for index.php itself through untouched.
-    RewriteCond %{REQUEST_URI} ^/(.*/)?index\.php$ [NC]
-    RewriteRule ^ - [L]
-
-    # Let requests for the static assets the page needs through untouched.
-    RewriteCond %{REQUEST_URI} \.(js|css|png|jpe?g|gif|svg|webp|ico|woff2?|ttf)$ [NC]
-    RewriteRule ^ - [L]
-
-    # Everything else that maps to a real file on disk gets blocked (403),
-    # e.g. .ts/.map/.json/.md/.lock/.yml files, dotfiles, other .php files, ...
-    RewriteCond %{REQUEST_FILENAME} -f
-    RewriteRule ^ - [F,L]
-</IfModule>
-
-# Fallback for servers without mod_rewrite: deny dotfiles and known source/meta extensions.
-# Use the Apache 2.4 "Require" syntax when available (mod_authz_core), and
-# fall back to the Apache 2.2 "Order/Deny" syntax otherwise, so this block
-# doesn't itself cause a 500 Internal Server Error on older Apache versions.
-<IfModule !mod_rewrite.c>
-    <IfModule mod_authz_core.c>
-        <FilesMatch "^\.|\.(ts|map|md|json|lock|yml|yaml|log)$">
-            Require all denied
-        </FilesMatch>
-
-        <Files "*.php">
-            Require all denied
-        </Files>
-        <Files "index.php">
-            Require all granted
-        </Files>
-    </IfModule>
-    <IfModule !mod_authz_core.c>
-        <FilesMatch "^\.|\.(ts|map|md|json|lock|yml|yaml|log)$">
-            Order allow,deny
-            Deny from all
-        </FilesMatch>
-
-        <Files "*.php">
-            Order allow,deny
-            Deny from all
-        </Files>
-        <Files "index.php">
-            Order allow,deny
-            Allow from all
-        </Files>
-    </IfModule>
-</IfModule>
 
 
