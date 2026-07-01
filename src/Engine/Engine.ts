@@ -127,7 +127,7 @@ export class Engine {
         // know that height from here, we instead tell the parent how tall the iframe needs to
         // be (based on the width it was given) in order to keep the 16:9 aspect ratio.
         if (window.self !== window.top && window.parent) {
-            const desiredHeight = Math.round(window.innerWidth * (virtualHeight / virtualWidth));
+            const desiredHeight = Math.round(window.innerWidth * (virtualHeight / virtualWidth) / 1.5);
             window.parent.postMessage({type: 'setHeight', height: desiredHeight}, '*');
         }
     }
