@@ -11,6 +11,8 @@
 
 <div id="score-board">🧃 <span id="score">0</span></div>
 
+<button id="fullscreen-btn" title="Vollbild">⛶</button>
+
 <canvas id="c"></canvas>
 
 <!-- Upgrade Shop Button -->

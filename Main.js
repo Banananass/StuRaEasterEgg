@@ -5,6 +5,8 @@ import { Beaver } from './src/Beaver.js';
 import { JuiceboxSpawner } from './src/JuiceboxSpawner.js';
 import { Engine } from "./src/Engine/Engine.js";
 import { UpgradeShop } from "./src/UpgradeShop.js";
+import { FullscreenManager } from "./src/Engine/FullscreenManager.js";
+const fullscreenManager = new FullscreenManager('fullscreen-btn');
 const beaver = new Beaver();
 const JuiceBoxSpawner = new JuiceboxSpawner();
 const upgradeShop = new UpgradeShop();

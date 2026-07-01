@@ -58,6 +58,43 @@ canvas {
     opacity: 1;
 }
 
+/* --- FULLSCREEN BUTTON --- */
+
+#fullscreen-btn {
+    position: fixed;
+    top: 12px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    background: rgba(20, 20, 20, 0.55);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.1s, border-color 0.15s;
+}
+
+#fullscreen-btn:hover {
+    background: rgba(255, 204, 0, 0.85);
+    color: #111;
+    border-color: #ffcc00;
+}
+
+#fullscreen-btn:active {
+    transform: scale(0.9);
+}
+
+#fullscreen-btn.active {
+    background: rgba(255, 204, 0, 0.9);
+    color: #111;
+}
+
 /* --- UPGRADE SHOP --- */
 
 #upgrade-shop-btn {
