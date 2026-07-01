@@ -30,17 +30,37 @@ Options -Indexes -MultiViews
 </IfModule>
 
 # Fallback for servers without mod_rewrite: deny dotfiles and known source/meta extensions.
+# Use the Apache 2.4 "Require" syntax when available (mod_authz_core), and
+# fall back to the Apache 2.2 "Order/Deny" syntax otherwise, so this block
+# doesn't itself cause a 500 Internal Server Error on older Apache versions.
 <IfModule !mod_rewrite.c>
-    <FilesMatch "^\.|\.(ts|map|md|json|lock|yml|yaml|log)$">
-        Require all denied
-    </FilesMatch>
+    <IfModule mod_authz_core.c>
+        <FilesMatch "^\.|\.(ts|map|md|json|lock|yml|yaml|log)$">
+            Require all denied
+        </FilesMatch>
 
-    <Files "*.php">
-        Require all denied
-    </Files>
-    <Files "index.php">
-        Require all granted
-    </Files>
+        <Files "*.php">
+            Require all denied
+        </Files>
+        <Files "index.php">
+            Require all granted
+        </Files>
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        <FilesMatch "^\.|\.(ts|map|md|json|lock|yml|yaml|log)$">
+            Order allow,deny
+            Deny from all
+        </FilesMatch>
+
+        <Files "*.php">
+            Order allow,deny
+            Deny from all
+        </Files>
+        <Files "index.php">
+            Order allow,deny
+            Allow from all
+        </Files>
+    </IfModule>
 </IfModule>
 
 
