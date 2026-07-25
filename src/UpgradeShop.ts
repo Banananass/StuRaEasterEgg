@@ -1,6 +1,7 @@
 import {GameObject} from './Engine/GameObject.js';
 import {ScoreManager} from './ScoreManager.js';
 import {Upgrade, INITIAL_UPGRADES} from './UpgradeData.js';
+import {Localization} from './Localization.js';
 
 //TODO: Untangle
 
@@ -18,6 +19,7 @@ export class UpgradeShop extends GameObject {
     private shopButton!: HTMLButtonElement;
     private shopOverlay!: HTMLDivElement;
     private shopContent!: HTMLDivElement;
+    private gameRoot: HTMLElement | null = null;
 
     // Zoom and Pan States
     private zoomScale: number = 1.0;
@@ -37,12 +39,82 @@ export class UpgradeShop extends GameObject {
         this.upgrades.forEach(u => {
             if (UpgradeShop.levels[u.id] === undefined) {
                 UpgradeShop.levels[u.id] = u.level;
+            } else {
+                // Sync from any level already known (e.g. restored from a save)
+                u.level = UpgradeShop.levels[u.id];
             }
         });
     }
 
     public static getUpgradeLevel(id: string): number {
         return this.levels[id] || 0;
+    }
+
+    /**
+     * Returns a shallow copy of every upgrade's current level, keyed by id.
+     * Used by the save system to serialize progress.
+     */
+    public static getAllLevels(): Record<string, number> {
+        return {...this.levels};
+    }
+
+    /**
+     * Applies a set of upgrade levels (e.g. restored from a save file).
+     * Ignores unknown ids and clamps to each upgrade's level cap.
+     */
+    public static applyLevels(levels: Record<string, number>): void {
+        for (const [id, level] of Object.entries(levels)) {
+            if (typeof level === 'number' && level >= 0) {
+                this.levels[id] = level;
+            }
+        }
+        if (this.Instance) {
+            this.Instance.upgrades.forEach(u => {
+                if (levels[u.id] !== undefined) {
+                    u.level = Math.max(0, Math.min(levels[u.id], u.levelCap));
+                    this.levels[u.id] = u.level;
+                }
+            });
+            this.Instance.updateHTML();
+        }
+    }
+
+    /**
+     * Resets every upgrade back to level 0. Used by the pause menu's
+     * "reset progress" button.
+     */
+    public static resetProgress(): void {
+        for (const id of Object.keys(this.levels)) {
+            this.levels[id] = 0;
+        }
+        if (this.Instance) {
+            this.Instance.upgrades.forEach(u => u.level = 0);
+            this.Instance.buttonUnlocked = false;
+            if (this.Instance.shopButton) {
+                this.Instance.shopButton.classList.remove('visible');
+            }
+            this.Instance.updateHTML();
+        }
+    }
+
+    /** Closes the shop overlay if it is currently open. */
+    public static close(): void {
+        if (this.Instance && this.isOpen) {
+            this.Instance.closeShop();
+        }
+    }
+
+    /** Opens the shop overlay (e.g. via the Space key). */
+    public static open(): void {
+        if (this.Instance && !this.isOpen) {
+            this.Instance.openShop();
+        }
+    }
+
+    /** Opens the shop if closed, or closes it if open. */
+    public static toggle(): void {
+        if (this.isOpen) this.close();
+        else this.open();
     }
 
     override start(): void {
@@ -60,6 +132,8 @@ export class UpgradeShop extends GameObject {
     }
 
     private initDOM(): void {
+        this.gameRoot = document.getElementById('game-root');
+
         // Fetch pre-existing upgrade shop button from DOM
         const btn = document.getElementById('upgrade-shop-btn');
         if (btn) {
@@ -79,6 +153,15 @@ export class UpgradeShop extends GameObject {
             }
         }
 
+        // Click outside the shop overlay content closes it
+        document.addEventListener('click', (e: MouseEvent) => {
+            if (!UpgradeShop.isOpen || !this.shopOverlay) return;
+            const target = e.target as Node | null;
+            if (target && !this.shopOverlay.contains(target) && (!this.shopButton || !this.shopButton.contains(target))) {
+                this.closeShop();
+            }
+        });
+
         // Fetch scalable contents wrapper
         const content = document.getElementById('upgrade-shop-content');
         if (content) {
@@ -87,6 +170,9 @@ export class UpgradeShop extends GameObject {
 
         this.setupZoomAndPan();
         this.updateHTML();
+
+        // Re-render dynamic shop content whenever the active language changes
+        Localization.onChange.push(() => this.updateHTML());
     }
 
     private setupZoomAndPan(): void {
@@ -159,6 +245,9 @@ export class UpgradeShop extends GameObject {
         if (this.shopOverlay) {
             this.shopOverlay.style.display = 'flex';
         }
+        if (this.gameRoot) {
+            this.gameRoot.classList.add('blurred');
+        }
 
         // Reset transform to default when opening the shop for consistency
         this.zoomScale = 1.0;
@@ -173,6 +262,9 @@ export class UpgradeShop extends GameObject {
         UpgradeShop.isOpen = false;
         if (this.shopOverlay) {
             this.shopOverlay.style.display = 'none';
+        }
+        if (this.gameRoot) {
+            this.gameRoot.classList.remove('blurred');
         }
     }
 
@@ -203,12 +295,17 @@ export class UpgradeShop extends GameObject {
             nodeEl.style.top = `${upgrade.y}%`;
 
             if (state === 'teased') {
-                const dep = upgrade.dependency!;
-                const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
+                const deps = upgrade.dependencies!;
+                const requirementText = deps
+                    .map(dep => {
+                        const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
+                        return Localization.t('shop.requirementLevel', {name: depUpgrade.name[Localization.locale], level: dep.minLevel});
+                    })
+                    .join(` ${Localization.t('shop.and')} `);
                 nodeEl.innerHTML = `
                     <div class="node-icon">🔒</div>
-                    <div class="node-title">???</div>
-                    <div class="node-desc teaser">Erfordert ${depUpgrade.name} auf Stufe ${dep.minLevel} zum Freischalten.</div>
+                    <div class="node-title">${Localization.t('shop.locked')}</div>
+                    <div class="node-desc teaser">${Localization.t('shop.requires', {req: requirementText})}</div>
                 `;
             } else {
                 const isMax = upgrade.level >= upgrade.levelCap;
@@ -218,34 +315,43 @@ export class UpgradeShop extends GameObject {
                 const showBuyButton = !isMax;
 
                 nodeEl.innerHTML = `
-                    <div class="node-title">${upgrade.name}</div>
-                    <div class="node-desc">${upgrade.description}</div>
-                    <div class="node-level">Stufe: ${upgrade.level} / ${upgrade.levelCap}</div>
+                    <div class="node-title">${upgrade.name[Localization.locale]}</div>
+                    <div class="node-desc flavour">${upgrade.flavourText[Localization.locale]}</div>
+                    <div class="node-desc effect">${upgrade.effectText[Localization.locale]}</div>
+                    <div class="node-level">${Localization.t('shop.level')}: ${upgrade.level} / ${upgrade.levelCap}</div>
                     ${showBuyButton ? `
                         <button class="node-buy-btn" ${(!canAfford || !depMet) ? 'disabled' : ''}>
-                            Kaufen (${price} 🧃)
+                            ${Localization.t('shop.buy')} (${price} 🧃)
                         </button>
                     ` : `
-                        <div class="node-max">MAXIMALE STUFE</div>
+                        <div class="node-max">${Localization.t('shop.max')}</div>
                     `}
                 `;
 
                 if (showBuyButton) {
                     const buyBtn = nodeEl.querySelector('.node-buy-btn');
                     if (buyBtn && canAfford && depMet) {
-                        buyBtn.addEventListener('click', () => this.buyUpgrade(upgrade));
+                        buyBtn.addEventListener('click', (e: Event) => {
+                            // Prevent bubbling to the document click listener, which would
+                            // otherwise see the (now-detached, after updateHTML() rebuilds
+                            // the node list) button as "outside" the overlay and close the shop.
+                            e.stopPropagation();
+                            this.buyUpgrade(upgrade);
+                        });
                     }
                 }
             }
 
             nodesContainer.appendChild(nodeEl);
 
-            // Draw link from dependency to this node if dependency exists
-            if (upgrade.dependency) {
-                const depUpgrade = this.upgrades.find(u => u.id === upgrade.dependency!.upgradeId)!;
-                const depState = this.getUpgradeState(depUpgrade);
+            // Draw links from each dependency to this node
+            if (upgrade.dependencies) {
+                for (const dep of upgrade.dependencies) {
+                    const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
+                    const depState = this.getUpgradeState(depUpgrade);
 
-                if (depState !== 'hidden') {
+                    if (depState === 'hidden') continue;
+
                     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                     line.setAttribute('x1', String(depUpgrade.x));
                     line.setAttribute('y1', String(depUpgrade.y));
@@ -265,22 +371,27 @@ export class UpgradeShop extends GameObject {
     }
 
     private getUpgradeState(upgrade: Upgrade): 'hidden' | 'teased' | 'revealed' {
-        if (!upgrade.dependency) return 'revealed';
+        if (!upgrade.dependencies || upgrade.dependencies.length === 0) return 'revealed';
 
-        const depUpgrade = this.upgrades.find(u => u.id === upgrade.dependency!.upgradeId)!;
-        if (depUpgrade.level >= upgrade.dependency.minLevel) {
-            return 'revealed';
-        } else if (depUpgrade.level >= upgrade.dependency.teaseLevel) {
-            return 'teased';
-        } else {
-            return 'hidden';
+        let allRevealed = true;
+        let allTeased = true;
+        for (const dep of upgrade.dependencies) {
+            const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
+            if (depUpgrade.level < dep.minLevel) allRevealed = false;
+            if (depUpgrade.level < dep.teaseLevel) allTeased = false;
         }
+
+        if (allRevealed) return 'revealed';
+        if (allTeased) return 'teased';
+        return 'hidden';
     }
 
     private isDependencyMet(upgrade: Upgrade): boolean {
-        if (!upgrade.dependency) return true;
-        const depUpgrade = this.upgrades.find(u => u.id === upgrade.dependency!.upgradeId)!;
-        return depUpgrade.level >= upgrade.dependency!.minLevel;
+        if (!upgrade.dependencies) return true;
+        return upgrade.dependencies.every(dep => {
+            const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
+            return depUpgrade.level >= dep.minLevel;
+        });
     }
 
     private buyUpgrade(upgrade: Upgrade): void {

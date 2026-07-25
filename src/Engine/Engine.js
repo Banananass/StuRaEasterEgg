@@ -108,10 +108,11 @@ export class Engine {
             go.start();
         }
         this.pendingAdd.clear();
-        const dt = Math.min(ts - this.lastTime, maxFrameTime);
+        const rawDt = Math.min(ts - this.lastTime, maxFrameTime);
         this.lastTime = ts;
-        // Update global Time metrics
-        Time.update(dt);
+        // Update global Time metrics (applies Time.timeScale)
+        Time.update(rawDt);
+        const dt = Time.deltaTimeMs;
         // ── Update Coroutines ──────────────────────────────────────────────
         const coroutinesToUpdate = [...this.activeCoroutines];
         for (const entry of coroutinesToUpdate) {

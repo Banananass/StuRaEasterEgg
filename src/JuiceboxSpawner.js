@@ -1,4 +1,5 @@
 import { GameObject } from './Engine/GameObject.js';
+import { Engine } from './Engine/Engine.js';
 import { Juicebox } from './Juicebox.js';
 import { UpgradeShop } from './UpgradeShop.js';
 const INITIAL_SPAWN_INTERVAL_MIN = 3000;
@@ -78,6 +79,25 @@ export class JuiceboxSpawner extends GameObject {
         if (this.spawnTimeout)
             clearTimeout(this.spawnTimeout);
         super.destroy();
+    }
+    /**
+     * Resets the spawner back to its initial state: clears all currently
+     * active juiceboxes (without awarding score/particles), cancels any
+     * pending spawn, and re-schedules spawns based on current upgrade levels.
+     */
+    static resetState() {
+        const instance = JuiceboxSpawner.Instance;
+        if (!instance)
+            return;
+        if (instance.spawnTimeout) {
+            clearTimeout(instance.spawnTimeout);
+            instance.spawnTimeout = null;
+        }
+        for (const jb of JuiceboxSpawner.activeJuiceboxes) {
+            Engine.Instance.removeObject(jb);
+        }
+        JuiceboxSpawner.activeJuiceboxes.clear();
+        instance.checkAndSpawn();
     }
 }
 //# sourceMappingURL=JuiceboxSpawner.js.map

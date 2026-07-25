@@ -89,5 +89,14 @@ export class Beaver extends GameObject {
     get CollectionRadius() {
         return INITIAL_COLLECTION_RADIUS + UpgradeShop.getUpgradeLevel('radius') * 15;
     }
+    /** Resets the beaver back to its initial centered position and rotation. */
+    static resetState() {
+        const instance = Beaver.Instance;
+        if (!instance)
+            return;
+        instance.position.x = Engine.Instance.canvas.width / 2;
+        instance.position.y = Engine.Instance.canvas.height / 2;
+        instance.rotation = 0;
+    }
 }
 //# sourceMappingURL=Beaver.js.map
