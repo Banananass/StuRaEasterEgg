@@ -77,7 +77,7 @@ export class Beaver extends GameObject {
         let da: number = targetAngle - this.rotation;
         while (da > Math.PI) da -= Math.PI * 2;
         while (da < -Math.PI) da += Math.PI * 2;
-        this.rotation += da * ROTATION_LERP * Time.deltaTime;
+        this.rotation += da * this.RotationSpeed * Time.deltaTime;
     }
 
     private collectJuice(): void {
@@ -95,11 +95,18 @@ export class Beaver extends GameObject {
     }
 
     private get Speed(): number{
-        return INITIAL_SPEED + UpgradeShop.getUpgradeLevel('speed') * 25;
+        // "Longer Legs" upgrade grants +20% movement speed per level
+        return INITIAL_SPEED * (1 + UpgradeShop.getUpgradeLevel('longerLegs') * 0.2);
+    }
+
+    /** Turn speed scales with movement speed, so a faster beaver also turns faster. */
+    private get RotationSpeed(): number{
+        return ROTATION_LERP * (this.Speed / INITIAL_SPEED);
     }
 
     private get CollectionRadius(): number{
-        return INITIAL_COLLECTION_RADIUS + UpgradeShop.getUpgradeLevel('radius') * 15;
+        // "Wide Stance" upgrade grants +20% collection radius per level
+        return INITIAL_COLLECTION_RADIUS * (1 + UpgradeShop.getUpgradeLevel('wideStance') * 0.2);
     }
 
     /** Resets the beaver back to its initial centered position and rotation. */

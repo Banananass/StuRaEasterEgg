@@ -17,8 +17,9 @@ export class Juicebox extends GameObject {
     alpha = 1;
     isGolden = false;
     get CollectingTime() {
-        const lvl = UpgradeShop.getUpgradeLevel('collectTime');
-        return Math.max(500, INITIAL_COLLECTING_TIME - lvl * 1000);
+        // "Eager Paws" upgrade grants +20% collection speed per level
+        const lvl = UpgradeShop.getUpgradeLevel('eagerPaws');
+        return INITIAL_COLLECTING_TIME / (1 + lvl * 0.2);
     }
     get GoldenChance() {
         switch (UpgradeShop.getUpgradeLevel('golden')) {

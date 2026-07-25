@@ -9,10 +9,16 @@ import { FullscreenManager } from "./src/Engine/FullscreenManager.js";
 import { PauseMenu } from "./src/PauseMenu.js";
 import { SaveManager } from "./src/SaveManager.js";
 import { Localization } from "./src/Localization.js";
+import { ScoreManager } from "./src/ScoreManager.js";
 // Restore saved language and translate static DOM before anything else renders.
 Localization.init();
 const fullscreenManager = new FullscreenManager('fullscreen-btn');
 const pauseMenu = new PauseMenu('menu-btn', 'pause-menu-overlay', 'pause-menu-content');
+// Debug helper: instantly grants 1000 juice for testing upgrades/purchases.
+const debugAddJuiceBtn = document.getElementById('debug-add-juice-btn');
+if (debugAddJuiceBtn) {
+    debugAddJuiceBtn.addEventListener('click', () => ScoreManager.Instance.addScore(1000));
+}
 const beaver = new Beaver();
 const JuiceBoxSpawner = new JuiceboxSpawner();
 const upgradeShop = new UpgradeShop();

@@ -15,6 +15,7 @@
     <div id="score-board">🧃 <span id="score">0</span></div>
 
     <button id="fullscreen-btn" data-i18n-title="button.fullscreen" title="Vollbild" aria-label="Vollbild">⛶</button>
+    <button id="debug-add-juice-btn" data-i18n="button.debugAddJuice">Debug: +1000 Saft</button>
 
     <canvas id="c" aria-label="Spielbereich"></canvas>
 
