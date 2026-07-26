@@ -85,9 +85,9 @@
 
         <div class="pause-menu-section credits-section">
             <h3 data-i18n="menu.credits.title">Credits</h3>
-            <p data-i18n="menu.credits.programming">Platzhalter Name – Programmierung</p>
-            <p data-i18n="menu.credits.graphics">Platzhalter Name – Grafik</p>
-            <p data-i18n="menu.credits.sound">Platzhalter Name – Sound & Musik</p>
+            <p data-i18n="menu.credits.programming">Nicolas Hentschel – Programmierung</p>
+            <p data-i18n="menu.credits.graphics">Niemand – Grafik</p>
+            <p data-i18n="menu.credits.sound">Niemand – Sound & Musik</p>
         </div>
     </div>
 </div>

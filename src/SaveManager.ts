@@ -42,7 +42,7 @@ export class SaveManager {
             Beaver.resetState();
         }
 
-        ScoreManager.Instance.setScore(data.score || 0, false);
+        ScoreManager.Instance.setScore(data.score || 0);
         UpgradeShop.applyLevels(data.upgrades || {});
 
         // Re-evaluate juicebox spawns against the (possibly changed) upgrade

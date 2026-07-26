@@ -31,7 +31,7 @@ export class SaveManager {
             ScoreManager.Instance.resetScore();
             Beaver.resetState();
         }
-        ScoreManager.Instance.setScore(data.score || 0, false);
+        ScoreManager.Instance.setScore(data.score || 0);
         UpgradeShop.applyLevels(data.upgrades || {});
         // Re-evaluate juicebox spawns against the (possibly changed) upgrade
         // levels; any newly needed juiceboxes start on cooldown, not instantly.
