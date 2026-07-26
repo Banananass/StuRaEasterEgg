@@ -26,13 +26,7 @@ export class SaveManager {
         };
     }
 
-    /**
-     * Applies loaded save data. When `cleanStart` is true (used for manual
-     * imports), everything is first reset to its initial state (beaver
-     * centered, upgrades/score zeroed) before the loaded values are applied,
-     * so an import always yields a consistent fresh state rather than
-     * merging with whatever was on screen before.
-     */
+    /** Applies loaded save data. `cleanStart` resets everything first (used for imports, so they don't merge with the current state). */
     private static apply(data: SaveData, cleanStart: boolean = false): void {
         if (!data || typeof data !== 'object') return;
 

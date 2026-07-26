@@ -73,6 +73,12 @@ const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     },
 };
 
+/** A piece of text with a German and an English version. */
+export interface LocalizedText {
+    de: string;
+    en: string;
+}
+
 /**
  * Localization – tiny static i18n helper for the game's two supported
  * languages (German/English). Not built to scale to more languages, just

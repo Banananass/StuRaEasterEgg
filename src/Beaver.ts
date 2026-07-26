@@ -43,7 +43,6 @@ export class Beaver extends GameObject {
         this.collectJuice();
     }
 
-    /** @param {CanvasRenderingContext2D} ctx */
     override draw(ctx: CanvasRenderingContext2D): void {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
@@ -99,8 +98,8 @@ export class Beaver extends GameObject {
         return INITIAL_SPEED * (1 + UpgradeShop.getUpgradeLevel('longerLegs') * 0.2);
     }
 
-    /** Turn speed scales with movement speed, so a faster beaver also turns faster. */
     private get RotationSpeed(): number{
+        // Turn speed scales with movement speed
         return ROTATION_LERP * (this.Speed / INITIAL_SPEED);
     }
 

@@ -1,8 +1,4 @@
-/**
- * Vector2.ts
- *
- * Simple 2D vector class for positions, velocities, etc.
- */
+/** Vector2 – simple 2D vector class for positions, velocities, etc. */
 export class Vector2 {
     x;
     y;

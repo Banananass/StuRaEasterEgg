@@ -3,8 +3,10 @@ import {ScoreManager} from './ScoreManager.js';
 import {Upgrade, INITIAL_UPGRADES} from './UpgradeData.js';
 import {Localization} from './Localization.js';
 
-//TODO: Untangle
-
+/**
+ * UpgradeShop – manages the upgrade tree UI: purchasing, DOM rendering,
+ * zoom/pan, and persistence hooks.
+ */
 export class UpgradeShop extends GameObject {
     public static Instance: UpgradeShop | null = null;
     public static isOpen: boolean = false;
@@ -79,10 +81,7 @@ export class UpgradeShop extends GameObject {
         }
     }
 
-    /**
-     * Resets every upgrade back to level 0. Used by the pause menu's
-     * "reset progress" button.
-     */
+    /** Resets every upgrade back to level 0. */
     public static resetProgress(): void {
         for (const id of Object.keys(this.levels)) {
             this.levels[id] = 0;
@@ -104,7 +103,7 @@ export class UpgradeShop extends GameObject {
         }
     }
 
-    /** Opens the shop overlay (e.g. via the Space key). */
+    /** Opens the shop overlay. */
     public static open(): void {
         if (this.Instance && !this.isOpen) {
             this.Instance.openShop();

@@ -1,11 +1,7 @@
 /**
- * Coroutine.ts
- *
- * Implements Unity-like Coroutine behavior using JavaScript Generators.
+ * Coroutine – Unity-like coroutine behavior implemented using JavaScript generators.
  */
-/**
- * Waited for a specified amount of seconds.
- */
+/** Waits for a specified amount of seconds. */
 export class WaitForSeconds {
     remainingSeconds;
     constructor(seconds) {
@@ -16,9 +12,7 @@ export class WaitForSeconds {
         return this.remainingSeconds <= 0;
     }
 }
-/**
- * Waits until the given predicate returns true.
- */
+/** Waits until the given predicate returns true. */
 export class WaitUntil {
     predicate;
     constructor(predicate) {
@@ -28,9 +22,7 @@ export class WaitUntil {
         return this.predicate();
     }
 }
-/**
- * Waits as long as the given predicate returns true.
- */
+/** Waits as long as the given predicate returns true. */
 export class WaitWhile {
     predicate;
     constructor(predicate) {
@@ -40,9 +32,7 @@ export class WaitWhile {
         return !this.predicate();
     }
 }
-/**
- * Represents a running Coroutine.
- */
+/** Represents a running coroutine. */
 export class Coroutine {
     routine;
     currentInstruction = null;
@@ -111,9 +101,7 @@ export class Coroutine {
         }
         return true;
     }
-    /**
-     * Terminate the coroutine execution prematurely.
-     */
+    /** Terminate the coroutine execution prematurely. */
     stop() {
         this.isFinished = true;
     }

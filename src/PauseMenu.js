@@ -6,14 +6,9 @@ import { JuiceboxSpawner } from './JuiceboxSpawner.js';
 import { SaveManager } from './SaveManager.js';
 import { Localization } from './Localization.js';
 /**
- * PauseMenu – simple modal menu that pauses the game and blurs the
- * background while open. Contains (currently unused) sound/music sliders,
- * a reset-progress button, and a credits section.
- *
- * Openable/closable via a toggle button, the close (x) button, or by
- * clicking outside the menu content. Escape/Space key handling is
- * coordinated centrally in Main.ts together with the UpgradeShop so the
- * two menus are never open at the same time.
+ * PauseMenu – modal menu that pauses the game and blurs the background while
+ * open (sound/music sliders, reset-progress, credits). Escape/Space handling
+ * lives in Main.ts, which ensures this and the UpgradeShop are never open together.
  */
 export class PauseMenu {
     static isOpen = false;

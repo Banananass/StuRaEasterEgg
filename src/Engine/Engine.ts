@@ -132,7 +132,7 @@ export class Engine {
         }
     }
 
-    /** @param {number} ts – DOMHighResTimeStamp from rAF */
+    /** @param {number} ts DOMHighResTimeStamp from rAF */
     private loop(ts: number): void {
         requestAnimationFrame((ts2: number) => this.loop(ts2));
 

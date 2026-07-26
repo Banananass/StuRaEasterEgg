@@ -29,20 +29,13 @@ export class Juicebox extends GameObject {
     }
 
     public get GoldenChance(): number {
-        switch (UpgradeShop.getUpgradeLevel('golden')){
-            case 0: return 0;
-            case 1: return 0.1;
-            case 2: return 0.2;
-            case 3: return 0.3;
-            default: return 0;
-        }
+        return 0;
     }
 
     private collectingCoroutineRef: Coroutine | null = null;
     private unCollectingCoroutineRef: Coroutine | null = null;
 
     private readonly spawner?: JuiceboxSpawner;
-
 
     constructor(spawner?: JuiceboxSpawner) {
         super();
@@ -101,7 +94,6 @@ export class Juicebox extends GameObject {
         this.destroy();
     }
 
-    /** @param {CanvasRenderingContext2D} ctx */
     override draw(ctx: CanvasRenderingContext2D): void {
         const {overlap_ms, alpha}: { overlap_ms: number; alpha: number } = this;
         const {x, y} = this.position;

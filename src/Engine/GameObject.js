@@ -29,21 +29,15 @@ export class GameObject {
     /** Called once before the first frame. */
     start() {
     }
-    /**
-     * Called every rendered frame.
-     */
+    /** Called every rendered frame. */
     update() {
     }
     /** Called at a fixed 50 fps rate (every 20 ms). */
     fixedUpdate() {
     }
-    /**
-     * Called every rendered frame after update().
-     * @param ctx
-     */
+    /** Called every rendered frame after update(). */
     draw(ctx) {
     }
-    // ── Coroutines (Unity-like) ──────────────────────────────────────────────
     /**
      * Start a coroutine bound to this GameObject.
      * The coroutine will automatically pause when this object is disabled,
@@ -52,9 +46,14 @@ export class GameObject {
     startCoroutine(routine) {
         return Engine.Instance.startCoroutine(routine, this);
     }
+    /**
+     * Stop a coroutine.
+     * @param coroutine The coroutine to stop.
+     */
     stopCoroutine(coroutine) {
         Engine.Instance.stopCoroutine(coroutine);
     }
+    /** Stop all coroutines bound to this GameObject. */
     stopAllCoroutines() {
         Engine.Instance.stopAllCoroutines(this);
     }

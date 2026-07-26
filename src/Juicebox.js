@@ -22,13 +22,7 @@ export class Juicebox extends GameObject {
         return INITIAL_COLLECTING_TIME / (1 + lvl * 0.2);
     }
     get GoldenChance() {
-        switch (UpgradeShop.getUpgradeLevel('golden')) {
-            case 0: return 0;
-            case 1: return 0.1;
-            case 2: return 0.2;
-            case 3: return 0.3;
-            default: return 0;
-        }
+        return 0;
     }
     collectingCoroutineRef = null;
     unCollectingCoroutineRef = null;
@@ -84,7 +78,6 @@ export class Juicebox extends GameObject {
         }
         this.destroy();
     }
-    /** @param {CanvasRenderingContext2D} ctx */
     draw(ctx) {
         const { overlap_ms, alpha } = this;
         const { x, y } = this.position;

@@ -1,7 +1,5 @@
 /**
- * Coroutine.ts
- *
- * Implements Unity-like Coroutine behavior using JavaScript Generators.
+ * Coroutine – Unity-like coroutine behavior implemented using JavaScript generators.
  */
 
 export interface YieldInstruction {
@@ -13,9 +11,7 @@ export interface YieldInstruction {
     isDone(dt: number): boolean;
 }
 
-/**
- * Waited for a specified amount of seconds.
- */
+/** Waits for a specified amount of seconds. */
 export class WaitForSeconds implements YieldInstruction {
     private remainingSeconds: number;
 
@@ -29,9 +25,7 @@ export class WaitForSeconds implements YieldInstruction {
     }
 }
 
-/**
- * Waits until the given predicate returns true.
- */
+/** Waits until the given predicate returns true. */
 export class WaitUntil implements YieldInstruction {
     private predicate: () => boolean;
 
@@ -44,9 +38,7 @@ export class WaitUntil implements YieldInstruction {
     }
 }
 
-/**
- * Waits as long as the given predicate returns true.
- */
+/** Waits as long as the given predicate returns true. */
 export class WaitWhile implements YieldInstruction {
     private predicate: () => boolean;
 
@@ -59,15 +51,13 @@ export class WaitWhile implements YieldInstruction {
     }
 }
 
-/**
- * Represents a running Coroutine.
- */
+/** Represents a running coroutine. */
 export class Coroutine implements YieldInstruction {
-    private routine: Generator<any, any, any>;
+    private routine: Generator<any>;
     private currentInstruction: YieldInstruction | null = null;
     private isFinished: boolean = false;
 
-    constructor(routine: Generator<any, any, any>) {
+    constructor(routine: Generator<any>) {
         this.routine = routine;
     }
 
@@ -133,9 +123,7 @@ export class Coroutine implements YieldInstruction {
         return true;
     }
 
-    /**
-     * Terminate the coroutine execution prematurely.
-     */
+    /** Terminate the coroutine execution prematurely. */
     stop(): void {
         this.isFinished = true;
     }

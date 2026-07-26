@@ -99,7 +99,7 @@ export class Engine {
             window.parent.postMessage({ type: 'setHeight', height: desiredHeight }, '*');
         }
     }
-    /** @param {number} ts – DOMHighResTimeStamp from rAF */
+    /** @param {number} ts DOMHighResTimeStamp from rAF */
     loop(ts) {
         requestAnimationFrame((ts2) => this.loop(ts2));
         // Flush newly added objects

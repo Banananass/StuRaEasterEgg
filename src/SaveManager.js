@@ -16,13 +16,7 @@ export class SaveManager {
             upgrades: UpgradeShop.getAllLevels(),
         };
     }
-    /**
-     * Applies loaded save data. When `cleanStart` is true (used for manual
-     * imports), everything is first reset to its initial state (beaver
-     * centered, upgrades/score zeroed) before the loaded values are applied,
-     * so an import always yields a consistent fresh state rather than
-     * merging with whatever was on screen before.
-     */
+    /** Applies loaded save data. `cleanStart` resets everything first (used for imports, so they don't merge with the current state). */
     static apply(data, cleanStart = false) {
         if (!data || typeof data !== 'object')
             return;

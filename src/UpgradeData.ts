@@ -1,13 +1,9 @@
+import {LocalizedText} from "./Localization.js";
+
 export interface UpgradeDependency {
     upgradeId: string;
     minLevel: number;
     teaseLevel: number;
-}
-
-/** A piece of text with a German and an English version. */
-export interface LocalizedText {
-    de: string;
-    en: string;
 }
 
 export interface Upgrade {

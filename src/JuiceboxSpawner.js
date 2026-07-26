@@ -1,7 +1,6 @@
 import { GameObject } from './Engine/GameObject.js';
 import { Engine } from './Engine/Engine.js';
 import { Juicebox } from './Juicebox.js';
-import { UpgradeShop } from './UpgradeShop.js';
 const INITIAL_SPAWN_INTERVAL_MIN = 3000;
 const INITIAL_SPAWN_INTERVAL_MAX = 7000;
 /**
@@ -11,41 +10,18 @@ export class JuiceboxSpawner extends GameObject {
     static Instance = null;
     spawnTimeout = null;
     get SpawnIntervalMin() {
-        switch (UpgradeShop.getUpgradeLevel('spawner')) {
-            case 0:
-                return INITIAL_SPAWN_INTERVAL_MIN;
-            case 1:
-                return INITIAL_SPAWN_INTERVAL_MIN * 0.9;
-            case 2:
-                return INITIAL_SPAWN_INTERVAL_MIN * 0.8;
-            case 3:
-                return INITIAL_SPAWN_INTERVAL_MIN * 0.7;
-            default:
-                return INITIAL_SPAWN_INTERVAL_MIN;
-        }
+        return INITIAL_SPAWN_INTERVAL_MIN;
     }
     get SpawnIntervalMax() {
-        switch (UpgradeShop.getUpgradeLevel('spawner')) {
-            case 0:
-                return INITIAL_SPAWN_INTERVAL_MAX;
-            case 1:
-                return INITIAL_SPAWN_INTERVAL_MAX * 0.9;
-            case 2:
-                return INITIAL_SPAWN_INTERVAL_MAX * 0.8;
-            case 3:
-                return INITIAL_SPAWN_INTERVAL_MAX * 0.7;
-            default:
-                return INITIAL_SPAWN_INTERVAL_MAX;
-        }
+        return INITIAL_SPAWN_INTERVAL_MAX;
+    }
+    get maxActive() {
+        return 1;
     }
     static activeJuiceboxes = new Set();
     start() {
         JuiceboxSpawner.Instance = this;
         this.checkAndSpawn();
-    }
-    get maxActive() {
-        const lvl = UpgradeShop.getUpgradeLevel('spawner');
-        return lvl >= 3 ? 2 : 1;
     }
     checkAndSpawn() {
         const target = this.maxActive;
@@ -80,11 +56,7 @@ export class JuiceboxSpawner extends GameObject {
             clearTimeout(this.spawnTimeout);
         super.destroy();
     }
-    /**
-     * Resets the spawner back to its initial state: clears all currently
-     * active juiceboxes (without awarding score/particles), cancels any
-     * pending spawn, and re-schedules spawns based on current upgrade levels.
-     */
+    /** Clears active juiceboxes and pending spawns, then re-schedules based on current upgrade levels. */
     static resetState() {
         const instance = JuiceboxSpawner.Instance;
         if (!instance)

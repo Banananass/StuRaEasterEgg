@@ -66,7 +66,6 @@ export class ParticleSystem extends GameObject {
         }
     }
 
-    /** @param {CanvasRenderingContext2D} ctx */
     override draw(ctx: CanvasRenderingContext2D): void {
         for (const p of this.particles) {
             ctx.save();
