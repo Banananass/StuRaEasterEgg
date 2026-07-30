@@ -10,6 +10,7 @@ class InputManager {
             x: virtualWidth / 2,
             y: virtualHeight / 2,
         };
+        //
         window.addEventListener('mousemove', (e) => {
             const canvas = document.getElementById('c');
             if (canvas) {

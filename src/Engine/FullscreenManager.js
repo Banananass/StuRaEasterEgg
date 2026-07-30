@@ -3,7 +3,7 @@
  *
  * Note: when embedded in a cross-origin iframe, the Fullscreen API only works
  * if the parent page's <iframe> tag has the `allowfullscreen` attribute (and
- * ideally `allow="fullscreen"`). Without that, requestFullscreen() will
+ * ideally `allow="fullscreen"` as well). Without that, requestFullscreen() will
  * silently reject.
  */
 export class FullscreenManager {
@@ -21,6 +21,7 @@ export class FullscreenManager {
         const doc = document;
         return doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement || null;
     }
+    /** Toggles fullscreen mode on or off.*/
     toggle() {
         if (!this.fullscreenElement) {
             const el = document.documentElement;
@@ -43,6 +44,7 @@ export class FullscreenManager {
                 exit.call(doc);
         }
     }
+    /** Change fullscreen button's text and title based on whether fullscreen is active. */
     updateButton() {
         const isFullscreen = !!this.fullscreenElement;
         this.button.textContent = isFullscreen ? '⤡' : '⛶';

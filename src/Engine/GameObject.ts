@@ -37,9 +37,7 @@ export abstract class GameObject {
     start(): void {
     }
 
-    /**
-     * Called every rendered frame.
-     */
+    /** Called every rendered frame. */
     update(): void {
     }
 
@@ -47,14 +45,9 @@ export abstract class GameObject {
     fixedUpdate(): void {
     }
 
-    /**
-     * Called every rendered frame after update().
-     * @param ctx
-     */
+    /** Called every rendered frame after update(). */
     draw(ctx: CanvasRenderingContext2D): void {
     }
-
-    // ── Coroutines (Unity-like) ──────────────────────────────────────────────
 
     /**
      * Start a coroutine bound to this GameObject.
@@ -65,10 +58,15 @@ export abstract class GameObject {
         return Engine.Instance.startCoroutine(routine, this);
     }
 
+    /**
+     * Stop a coroutine.
+     * @param coroutine The coroutine to stop.
+     */
     public stopCoroutine(coroutine: Coroutine): void {
         Engine.Instance.stopCoroutine(coroutine);
     }
 
+    /** Stop all coroutines bound to this GameObject. */
     public stopAllCoroutines(): void {
         Engine.Instance.stopAllCoroutines(this);
     }

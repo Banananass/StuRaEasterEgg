@@ -23,25 +23,19 @@ export class Juicebox extends GameObject {
     public isGolden: boolean = false;
 
     public get CollectingTime(): number {
-        const lvl = UpgradeShop.getUpgradeLevel('collectTime');
-        return Math.max(500, INITIAL_COLLECTING_TIME - lvl * 1000);
+        // "Eager Paws" upgrade grants +20% collection speed per level
+        const lvl = UpgradeShop.getUpgradeLevel('eagerPaws');
+        return INITIAL_COLLECTING_TIME / (1 + lvl * 0.2);
     }
 
     public get GoldenChance(): number {
-        switch (UpgradeShop.getUpgradeLevel('golden')){
-            case 0: return 0;
-            case 1: return 0.1;
-            case 2: return 0.2;
-            case 3: return 0.3;
-            default: return 0;
-        }
+        return 0;
     }
 
     private collectingCoroutineRef: Coroutine | null = null;
     private unCollectingCoroutineRef: Coroutine | null = null;
 
     private readonly spawner?: JuiceboxSpawner;
-
 
     constructor(spawner?: JuiceboxSpawner) {
         super();
@@ -100,7 +94,6 @@ export class Juicebox extends GameObject {
         this.destroy();
     }
 
-    /** @param {CanvasRenderingContext2D} ctx */
     override draw(ctx: CanvasRenderingContext2D): void {
         const {overlap_ms, alpha}: { overlap_ms: number; alpha: number } = this;
         const {x, y} = this.position;

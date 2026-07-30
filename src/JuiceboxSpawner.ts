@@ -1,6 +1,6 @@
 import {GameObject} from './Engine/GameObject.js';
+import {Engine} from './Engine/Engine.js';
 import {Juicebox} from './Juicebox.js';
-import {UpgradeShop} from './UpgradeShop.js';
 
 const INITIAL_SPAWN_INTERVAL_MIN: number = 3000;
 const INITIAL_SPAWN_INTERVAL_MAX: number = 7000;
@@ -13,33 +13,15 @@ export class JuiceboxSpawner extends GameObject {
     private spawnTimeout: ReturnType<typeof setTimeout> | null = null;
 
     public get SpawnIntervalMin(): number {
-        switch (UpgradeShop.getUpgradeLevel('spawner')) {
-            case 0:
-                return INITIAL_SPAWN_INTERVAL_MIN;
-            case 1:
-                return INITIAL_SPAWN_INTERVAL_MIN * 0.9;
-            case 2:
-                return INITIAL_SPAWN_INTERVAL_MIN * 0.8;
-            case 3:
-                return INITIAL_SPAWN_INTERVAL_MIN * 0.7;
-            default:
-                return INITIAL_SPAWN_INTERVAL_MIN;
-        }
+        return INITIAL_SPAWN_INTERVAL_MIN;
     }
 
     public get SpawnIntervalMax(): number {
-        switch (UpgradeShop.getUpgradeLevel('spawner')) {
-            case 0:
-                return INITIAL_SPAWN_INTERVAL_MAX;
-            case 1:
-                return INITIAL_SPAWN_INTERVAL_MAX * 0.9;
-            case 2:
-                return INITIAL_SPAWN_INTERVAL_MAX * 0.8;
-            case 3:
-                return INITIAL_SPAWN_INTERVAL_MAX * 0.7;
-            default:
-                return INITIAL_SPAWN_INTERVAL_MAX;
-        }
+        return INITIAL_SPAWN_INTERVAL_MAX;
+    }
+
+    public get maxActive(): number {
+        return 1;
     }
 
     public static readonly activeJuiceboxes: Set<Juicebox> = new Set<Juicebox>();
@@ -47,11 +29,6 @@ export class JuiceboxSpawner extends GameObject {
     override start(): void {
         JuiceboxSpawner.Instance = this;
         this.checkAndSpawn();
-    }
-
-    public get maxActive(): number {
-        const lvl = UpgradeShop.getUpgradeLevel('spawner');
-        return lvl >= 3 ? 2 : 1;
     }
 
     public checkAndSpawn(): void {
@@ -90,6 +67,24 @@ export class JuiceboxSpawner extends GameObject {
     override destroy(): void {
         if (this.spawnTimeout) clearTimeout(this.spawnTimeout);
         super.destroy();
+    }
+
+    /** Clears active juiceboxes and pending spawns, then re-schedules based on current upgrade levels. */
+    public static resetState(): void {
+        const instance = JuiceboxSpawner.Instance;
+        if (!instance) return;
+
+        if (instance.spawnTimeout) {
+            clearTimeout(instance.spawnTimeout);
+            instance.spawnTimeout = null;
+        }
+
+        for (const jb of JuiceboxSpawner.activeJuiceboxes) {
+            Engine.Instance.removeObject(jb);
+        }
+        JuiceboxSpawner.activeJuiceboxes.clear();
+
+        instance.checkAndSpawn();
     }
 }
 

@@ -36,7 +36,6 @@ export class Beaver extends GameObject {
             return;
         this.collectJuice();
     }
-    /** @param {CanvasRenderingContext2D} ctx */
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
@@ -70,7 +69,7 @@ export class Beaver extends GameObject {
             da -= Math.PI * 2;
         while (da < -Math.PI)
             da += Math.PI * 2;
-        this.rotation += da * ROTATION_LERP * Time.deltaTime;
+        this.rotation += da * this.RotationSpeed * Time.deltaTime;
     }
     collectJuice() {
         for (const jb of JuiceboxSpawner.activeJuiceboxes) {
@@ -84,10 +83,25 @@ export class Beaver extends GameObject {
         }
     }
     get Speed() {
-        return INITIAL_SPEED + UpgradeShop.getUpgradeLevel('speed') * 25;
+        // "Longer Legs" upgrade grants +20% movement speed per level
+        return INITIAL_SPEED * (1 + UpgradeShop.getUpgradeLevel('longerLegs') * 0.2);
+    }
+    get RotationSpeed() {
+        // Turn speed scales with movement speed
+        return ROTATION_LERP * (this.Speed / INITIAL_SPEED);
     }
     get CollectionRadius() {
-        return INITIAL_COLLECTION_RADIUS + UpgradeShop.getUpgradeLevel('radius') * 15;
+        // "Wide Stance" upgrade grants +20% collection radius per level
+        return INITIAL_COLLECTION_RADIUS * (1 + UpgradeShop.getUpgradeLevel('wideStance') * 0.2);
+    }
+    /** Resets the beaver back to its initial centered position and rotation. */
+    static resetState() {
+        const instance = Beaver.Instance;
+        if (!instance)
+            return;
+        instance.position.x = Engine.Instance.canvas.width / 2;
+        instance.position.y = Engine.Instance.canvas.height / 2;
+        instance.rotation = 0;
     }
 }
 //# sourceMappingURL=Beaver.js.map

@@ -47,7 +47,6 @@ export class ParticleSystem extends GameObject {
             this.destroy();
         }
     }
-    /** @param {CanvasRenderingContext2D} ctx */
     draw(ctx) {
         for (const p of this.particles) {
             ctx.save();

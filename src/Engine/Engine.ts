@@ -132,7 +132,7 @@ export class Engine {
         }
     }
 
-    /** @param {number} ts – DOMHighResTimeStamp from rAF */
+    /** @param {number} ts DOMHighResTimeStamp from rAF */
     private loop(ts: number): void {
         requestAnimationFrame((ts2: number) => this.loop(ts2));
 
@@ -143,11 +143,12 @@ export class Engine {
         }
         this.pendingAdd.clear();
 
-        const dt: number = Math.min(ts - this.lastTime, maxFrameTime);
+        const rawDt: number = Math.min(ts - this.lastTime, maxFrameTime);
         this.lastTime = ts;
 
-        // Update global Time metrics
-        Time.update(dt);
+        // Update global Time metrics (applies Time.timeScale)
+        Time.update(rawDt);
+        const dt: number = Time.deltaTimeMs;
 
         // ── Update Coroutines ──────────────────────────────────────────────
         const coroutinesToUpdate = [...this.activeCoroutines];

@@ -28,13 +28,27 @@ export class ScoreManager {
      * @param {number} amount
      */
     addScore(amount: number = 1): void {
-        this._score += amount;
+        this.setScore(this._score + amount);
+    }
+
+    /**
+     * Directly sets the score, refreshing the DOM.
+     * @param value The new score value.
+     */
+    setScore(value: number): void {
+        this._score = value;
         if (this._scoreEl) {
             this._scoreEl.textContent = String(this._score);
         }
-        if (this._boardEl) {
+        if (this._boardEl && this._score > 0) {
             this._boardEl.style.display = 'block'; // reveal on first collect
         }
+    }
+
+    /** Resets the score back to zero. */
+    resetScore(): void {
+        this.setScore(0);
+        if (this._boardEl) this._boardEl.style.display = 'none';
     }
 }
 
