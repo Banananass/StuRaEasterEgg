@@ -31,6 +31,12 @@ export class UpgradeShop extends GameObject {
     private dragStartX: number = 0;
     private dragStartY: number = 0;
 
+    // Extra space (in grid px) kept between the outermost visible node and the pan wall
+    private static readonly PAN_WALL_BUFFER = 300;
+    // World-space (grid) bounds of currently visible nodes, incl. buffer. Only
+    // recomputed when the set of visible nodes can have changed (see updateHTML).
+    private panBounds = {minX: 0, maxX: 0, minY: 0, maxY: 0};
+
     private upgrades: Upgrade[] = [];
 
     constructor() {
@@ -178,14 +184,13 @@ export class UpgradeShop extends GameObject {
         const graphViewport = document.getElementById('upgrade-shop-graph');
         if (!graphViewport || !this.shopContent) return;
 
-        const MIN_ZOOM = 0.5;
-        const MAX_ZOOM = 3.0;
+        const MIN_ZOOM = 0.2;
+        const MAX_ZOOM = 2.5;
 
-        // Reset transforms
+        // Reset transforms, centering the grid origin (0, 0) in the viewport
         this.zoomScale = 1.0;
-        this.panX = 0;
-        this.panY = 0;
-        this.applyTransform();
+        this.updateBounds();
+        this.centerView();
 
         // 1. Mouse wheel zoom focusing on mouse coordinates
         graphViewport.addEventListener('wheel', (e: WheelEvent) => {
@@ -206,6 +211,7 @@ export class UpgradeShop extends GameObject {
             this.panX = mouseX - (mouseX - this.panX) * (this.zoomScale / oldScale);
             this.panY = mouseY - (mouseY - this.panY) * (this.zoomScale / oldScale);
 
+            this.clampPan();
             this.applyTransform();
         }, { passive: false });
 
@@ -221,6 +227,7 @@ export class UpgradeShop extends GameObject {
             if (!this.isDragging || !this.shopOverlay || this.shopOverlay.style.display === 'none') return;
             this.panX = e.clientX - this.dragStartX;
             this.panY = e.clientY - this.dragStartY;
+            this.clampPan();
             this.applyTransform();
         });
 
@@ -235,8 +242,88 @@ export class UpgradeShop extends GameObject {
 
     private applyTransform(): void {
         if (this.shopContent) {
-            this.shopContent.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoomScale})`;
+            // Round the pan offset to whole pixels - fractional translate values
+            // cause the browser to sub-pixel-render (blur) the scaled node content.
+            const x = Math.round(this.panX);
+            const y = Math.round(this.panY);
+            this.shopContent.style.transform = `translate(${x}px, ${y}px) scale(${this.zoomScale})`;
         }
+    }
+
+    /**
+     * Centers the grid origin (0, 0) within the graph viewport. Since node
+     * coordinates are absolute grid units (px), the viewport size must be
+     * factored in to keep the tree visually centered on open/reset.
+     */
+    private centerView(): void {
+        const graphViewport = document.getElementById('upgrade-shop-graph');
+        if (graphViewport) {
+            const rect = graphViewport.getBoundingClientRect();
+            this.panX = rect.width / 2;
+            this.panY = rect.height / 2;
+        } else {
+            this.panX = 0;
+            this.panY = 0;
+        }
+        this.clampPan();
+        this.applyTransform();
+    }
+
+    /**
+     * Recomputes the pan-wall bounds from the currently visible (non-hidden)
+     * nodes. Only needs to run when the set of visible nodes can have
+     * changed, i.e. on initial render and whenever purchasing an upgrade may
+     * newly tease a node - both of which go through updateHTML().
+     */
+    private updateBounds(): void {
+        const visible = this.upgrades.filter(u => this.getUpgradeState(u) !== 'hidden');
+        if (visible.length === 0) {
+            this.panBounds = {minX: 0, maxX: 0, minY: 0, maxY: 0};
+            return;
+        }
+
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        for (const u of visible) {
+            minX = Math.min(minX, u.x);
+            maxX = Math.max(maxX, u.x);
+            minY = Math.min(minY, u.y);
+            maxY = Math.max(maxY, u.y);
+        }
+
+        const buffer = UpgradeShop.PAN_WALL_BUFFER;
+        this.panBounds = {
+            minX: minX - buffer,
+            maxX: maxX + buffer,
+            minY: minY - buffer,
+            maxY: maxY + buffer
+        };
+    }
+
+    /**
+     * Clamps panX/panY so the walls (bounds of the visible node tree, plus
+     * buffer) can never be dragged/zoomed further than the viewport edge,
+     * preventing panning into empty space beyond what's necessary.
+     */
+    private clampPan(): void {
+        const graphViewport = document.getElementById('upgrade-shop-graph');
+        if (!graphViewport) return;
+
+        const rect = graphViewport.getBoundingClientRect();
+        const {minX, maxX, minY, maxY} = this.panBounds;
+
+        // Screen position of a wall = pan + gridCoord * zoom. Keep walls at
+        // or beyond the viewport edges (never revealing empty space past them).
+        const minPanX = rect.width - maxX * this.zoomScale;
+        const maxPanX = -minX * this.zoomScale;
+        this.panX = minPanX <= maxPanX
+            ? Math.min(maxPanX, Math.max(minPanX, this.panX))
+            : (minPanX + maxPanX) / 2; // graph narrower than viewport: center it
+
+        const minPanY = rect.height - maxY * this.zoomScale;
+        const maxPanY = -minY * this.zoomScale;
+        this.panY = minPanY <= maxPanY
+            ? Math.min(maxPanY, Math.max(minPanY, this.panY))
+            : (minPanY + maxPanY) / 2;
     }
 
     private openShop(): void {
@@ -250,9 +337,7 @@ export class UpgradeShop extends GameObject {
 
         // Reset transform to default when opening the shop for consistency
         this.zoomScale = 1.0;
-        this.panX = 0;
-        this.panY = 0;
-        this.applyTransform();
+        this.centerView();
 
         this.updateHTML();
     }
@@ -290,17 +375,13 @@ export class UpgradeShop extends GameObject {
             // Render node
             const nodeEl = document.createElement('div');
             nodeEl.className = `upgrade-node ${state}`;
-            nodeEl.style.left = `${upgrade.x}%`;
-            nodeEl.style.top = `${upgrade.y}%`;
+            nodeEl.style.left = `${upgrade.x}px`;
+            nodeEl.style.top = `${upgrade.y}px`;
 
             if (state === 'teased') {
-                const deps = upgrade.dependencies!;
-                const requirementText = deps
-                    .map(dep => {
-                        const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
-                        return Localization.t('shop.requirementLevel', {name: depUpgrade.name[Localization.locale], level: dep.minLevel});
-                    })
-                    .join(` ${Localization.t('shop.and')} `);
+                const dep = upgrade.dependency!;
+                const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
+                const requirementText = Localization.t('shop.requirementLevel', {name: depUpgrade.name[Localization.locale], level: dep.minLevel});
                 nodeEl.innerHTML = `
                     <div class="node-icon">🔒</div>
                     <div class="node-title">${Localization.t('shop.locked')}</div>
@@ -343,14 +424,12 @@ export class UpgradeShop extends GameObject {
 
             nodesContainer.appendChild(nodeEl);
 
-            // Draw links from each dependency to this node
-            if (upgrade.dependencies) {
-                for (const dep of upgrade.dependencies) {
-                    const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
-                    const depState = this.getUpgradeState(depUpgrade);
+            // Draw a link from the dependency to this node
+            if (upgrade.dependency) {
+                const depUpgrade = this.upgrades.find(u => u.id === upgrade.dependency!.upgradeId)!;
+                const depState = this.getUpgradeState(depUpgrade);
 
-                    if (depState === 'hidden') continue;
-
+                if (depState !== 'hidden') {
                     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                     line.setAttribute('x1', String(depUpgrade.x));
                     line.setAttribute('y1', String(depUpgrade.y));
@@ -367,30 +446,29 @@ export class UpgradeShop extends GameObject {
                 }
             }
         });
+
+        // The set of visible nodes may have changed (new tease/reveal), so
+        // refresh the pan walls and re-clamp the current view against them.
+        this.updateBounds();
+        this.clampPan();
+        this.applyTransform();
     }
 
     private getUpgradeState(upgrade: Upgrade): 'hidden' | 'teased' | 'revealed' {
-        if (!upgrade.dependencies || upgrade.dependencies.length === 0) return 'revealed';
+        if (!upgrade.dependency) return 'revealed';
 
-        let allRevealed = true;
-        let allTeased = true;
-        for (const dep of upgrade.dependencies) {
-            const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
-            if (depUpgrade.level < dep.minLevel) allRevealed = false;
-            if (depUpgrade.level < dep.teaseLevel) allTeased = false;
-        }
+        const dep = upgrade.dependency;
+        const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
 
-        if (allRevealed) return 'revealed';
-        if (allTeased) return 'teased';
+        if (depUpgrade.level >= dep.minLevel) return 'revealed';
+        if (depUpgrade.level >= dep.teaseLevel) return 'teased';
         return 'hidden';
     }
 
     private isDependencyMet(upgrade: Upgrade): boolean {
-        if (!upgrade.dependencies) return true;
-        return upgrade.dependencies.every(dep => {
-            const depUpgrade = this.upgrades.find(u => u.id === dep.upgradeId)!;
-            return depUpgrade.level >= dep.minLevel;
-        });
+        if (!upgrade.dependency) return true;
+        const depUpgrade = this.upgrades.find(u => u.id === upgrade.dependency!.upgradeId)!;
+        return depUpgrade.level >= upgrade.dependency.minLevel;
     }
 
     private buyUpgrade(upgrade: Upgrade): void {

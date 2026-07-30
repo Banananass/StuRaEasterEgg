@@ -35,7 +35,7 @@
     </div>
     <div id="upgrade-shop-graph">
         <div id="upgrade-shop-content">
-            <svg id="upgrade-shop-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            <svg id="upgrade-shop-svg"></svg>
             <div id="upgrade-shop-nodes"></div>
         </div>
     </div>

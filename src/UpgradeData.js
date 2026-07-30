@@ -16,8 +16,8 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 1,
         prices: [5],
-        x: 50.0,
-        y: 50.0
+        x: 0,
+        y: 0
     },
     {
         id: 'eagerPaws',
@@ -36,15 +36,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 6,
         prices: [5, 8, 11, 17, 25, 38],
-        dependencies: [
-            {
-                upgradeId: 'sweetStart',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 40.1,
-        y: 50.0
+        dependency: { upgradeId: 'sweetStart', minLevel: 1, teaseLevel: 1 },
+        x: -495,
+        y: 0
     },
     {
         id: 'longerLegs',
@@ -63,15 +57,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 6,
         prices: [8, 12, 18, 27, 40, 61],
-        dependencies: [
-            {
-                upgradeId: 'eagerPaws',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-        ],
-        x: 69.71,
-        y: 52.07
+        dependency: { upgradeId: 'eagerPaws', minLevel: 2, teaseLevel: 1 },
+        x: 985,
+        y: 104
     },
     {
         id: 'wideStance',
@@ -90,15 +78,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 6,
         prices: [10, 15, 22, 34, 51, 76],
-        dependencies: [
-            {
-                upgradeId: 'eagerPaws',
-                minLevel: 3,
-                teaseLevel: 2
-            },
-        ],
-        x: 30.29,
-        y: 47.93
+        dependency: { upgradeId: 'eagerPaws', minLevel: 3, teaseLevel: 2 },
+        x: -985,
+        y: -104
     },
     {
         id: 'moreJuiceTaps',
@@ -117,20 +99,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 4,
         prices: [15, 33, 73, 160],
-        dependencies: [
-            {
-                upgradeId: 'longerLegs',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-            {
-                upgradeId: 'wideStance',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 30.88,
-        y: 72.72
+        dependency: { upgradeId: 'longerLegs', minLevel: 1, teaseLevel: 1 },
+        x: -956,
+        y: 1136
     },
     {
         id: 'steadySapFlow',
@@ -149,15 +120,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 5,
         prices: [12, 19, 31, 49, 79],
-        dependencies: [
-            {
-                upgradeId: 'moreJuiceTaps',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 87.53,
-        y: 62.6
+        dependency: { upgradeId: 'moreJuiceTaps', minLevel: 1, teaseLevel: 1 },
+        x: 1877,
+        y: 630
     },
     {
         id: 'comboUnlock',
@@ -176,15 +141,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 1,
         prices: [18],
-        dependencies: [
-            {
-                upgradeId: 'moreJuiceTaps',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-        ],
-        x: 51,
-        y: 78
+        dependency: { upgradeId: 'moreJuiceTaps', minLevel: 2, teaseLevel: 1 },
+        x: 50,
+        y: 1400
     },
     {
         id: 'fermentationBoost',
@@ -203,15 +162,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 5,
         prices: [20, 34, 58, 98, 167],
-        dependencies: [
-            {
-                upgradeId: 'comboUnlock',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 71.02,
-        y: 83.57
+        dependency: { upgradeId: 'comboUnlock', minLevel: 1, teaseLevel: 1 },
+        x: 1051,
+        y: 1678
     },
     {
         id: 'comboGrowth',
@@ -230,15 +183,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 5,
         prices: [25, 42, 72, 123, 209],
-        dependencies: [
-            {
-                upgradeId: 'fermentationBoost',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-        ],
-        x: 76.28,
-        y: 91.94
+        dependency: { upgradeId: 'fermentationBoost', minLevel: 2, teaseLevel: 1 },
+        x: 1314,
+        y: 2097
     },
     {
         id: 'forgivingTimer',
@@ -257,15 +204,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 5,
         prices: [20, 32, 51, 82, 131],
-        dependencies: [
-            {
-                upgradeId: 'comboGrowth',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-        ],
-        x: 81.55,
-        y: 100.31
+        dependency: { upgradeId: 'comboGrowth', minLevel: 2, teaseLevel: 1 },
+        x: 1577,
+        y: 2516
     },
     {
         id: 'maxComboCap',
@@ -284,15 +225,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 5,
         prices: [30, 51, 87, 147, 251],
-        dependencies: [
-            {
-                upgradeId: 'comboGrowth',
-                minLevel: 3,
-                teaseLevel: 2
-            },
-        ],
-        x: 60.53,
-        y: 108.45
+        dependency: { upgradeId: 'comboGrowth', minLevel: 3, teaseLevel: 2 },
+        x: 527,
+        y: 2923
     },
     {
         id: 'goldenPacketChance',
@@ -311,15 +246,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 5,
         prices: [35, 63, 113, 204, 367],
-        dependencies: [
-            {
-                upgradeId: 'comboGrowth',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 98.02,
-        y: 84.97
+        dependency: { upgradeId: 'comboGrowth', minLevel: 1, teaseLevel: 1 },
+        x: 2401,
+        y: 1749
     },
     {
         id: 'sprintSap',
@@ -338,15 +267,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 1,
         prices: [50],
-        dependencies: [
-            {
-                upgradeId: 'moreJuiceTaps',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 32.05,
-        y: 85.28
+        dependency: { upgradeId: 'moreJuiceTaps', minLevel: 1, teaseLevel: 1 },
+        x: -898,
+        y: 1764
     },
     {
         id: 'sprintPotency',
@@ -365,15 +288,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 4,
         prices: [40, 68, 116, 197],
-        dependencies: [
-            {
-                upgradeId: 'sprintSap',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 34.52,
-        y: 97.03
+        dependency: { upgradeId: 'sprintSap', minLevel: 1, teaseLevel: 1 },
+        x: -774,
+        y: 2352
     },
     {
         id: 'sprintDuration',
@@ -392,15 +309,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 4,
         prices: [40, 68, 116, 197],
-        dependencies: [
-            {
-                upgradeId: 'sprintSap',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 15.35,
-        y: 85.32
+        dependency: { upgradeId: 'sprintSap', minLevel: 1, teaseLevel: 1 },
+        x: -1732,
+        y: 1766
     },
     {
         id: 'sprintFrequency',
@@ -419,20 +330,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 4,
         prices: [45, 81, 146, 262],
-        dependencies: [
-            {
-                upgradeId: 'sprintPotency',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-            {
-                upgradeId: 'sprintDuration',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-        ],
-        x: 31.46,
-        y: 106.43
+        dependency: { upgradeId: 'sprintPotency', minLevel: 2, teaseLevel: 1 },
+        x: -927,
+        y: 2822
     },
     {
         id: 'nectarBrew',
@@ -451,15 +351,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 1,
         prices: [50],
-        dependencies: [
-            {
-                upgradeId: 'moreJuiceTaps',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 11.07,
-        y: 57.24
+        dependency: { upgradeId: 'moreJuiceTaps', minLevel: 1, teaseLevel: 1 },
+        x: -1946,
+        y: 362
     },
     {
         id: 'nectarPotency',
@@ -478,15 +372,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 4,
         prices: [40, 68, 116, 197],
-        dependencies: [
-            {
-                upgradeId: 'nectarBrew',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 3.29,
-        y: 66.38
+        dependency: { upgradeId: 'nectarBrew', minLevel: 1, teaseLevel: 1 },
+        x: -2335,
+        y: 819
     },
     {
         id: 'nectarDuration',
@@ -505,15 +393,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 4,
         prices: [40, 68, 116, 197],
-        dependencies: [
-            {
-                upgradeId: 'nectarBrew',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 0.86,
-        y: 44.02
+        dependency: { upgradeId: 'nectarBrew', minLevel: 1, teaseLevel: 1 },
+        x: -2457,
+        y: -299
     },
     {
         id: 'nectarFrequency',
@@ -532,20 +414,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 4,
         prices: [45, 81, 146, 262],
-        dependencies: [
-            {
-                upgradeId: 'nectarPotency',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-            {
-                upgradeId: 'nectarDuration',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-        ],
-        x: -6.07,
-        y: 69.66
+        dependency: { upgradeId: 'nectarPotency', minLevel: 2, teaseLevel: 1 },
+        x: -2803,
+        y: 983
     },
     {
         id: 'stormWarning',
@@ -564,15 +435,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 1,
         prices: [60],
-        dependencies: [
-            {
-                upgradeId: 'moreJuiceTaps',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-        ],
-        x: 20.53,
-        y: 23.54
+        dependency: { upgradeId: 'moreJuiceTaps', minLevel: 2, teaseLevel: 1 },
+        x: -1473,
+        y: -1323
     },
     {
         id: 'stormFrequency',
@@ -591,15 +456,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 5,
         prices: [50, 85, 144, 246, 418],
-        dependencies: [
-            {
-                upgradeId: 'stormWarning',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 8.55,
-        y: 22.91
+        dependency: { upgradeId: 'stormWarning', minLevel: 1, teaseLevel: 1 },
+        x: -2072,
+        y: -1354
     },
     {
         id: 'stormLifespan',
@@ -618,15 +477,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 5,
         prices: [55, 94, 159, 270, 459],
-        dependencies: [
-            {
-                upgradeId: 'stormWarning',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 24.8,
-        y: 7.38
+        dependency: { upgradeId: 'stormWarning', minLevel: 1, teaseLevel: 1 },
+        x: -1260,
+        y: -2131
     },
     {
         id: 'stormValue',
@@ -645,20 +498,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 5,
         prices: [60, 108, 194, 350, 630],
-        dependencies: [
-            {
-                upgradeId: 'stormFrequency',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-            {
-                upgradeId: 'stormLifespan',
-                minLevel: 2,
-                teaseLevel: 1
-            },
-        ],
-        x: 0.27,
-        y: 17.51
+        dependency: { upgradeId: 'stormFrequency', minLevel: 2, teaseLevel: 1 },
+        x: -2486,
+        y: -1624
     },
     {
         id: 'stormDomestication',
@@ -677,20 +519,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 1,
         prices: [5000],
-        dependencies: [
-            {
-                upgradeId: 'stormValue',
-                minLevel: 5,
-                teaseLevel: 4
-            },
-            {
-                upgradeId: 'otterColony',
-                minLevel: 3,
-                teaseLevel: 2
-            },
-        ],
-        x: 102.02,
-        y: -9.71
+        dependency: { upgradeId: 'stormValue', minLevel: 5, teaseLevel: 4 },
+        x: 2601,
+        y: -2985
     },
     {
         id: 'trainedOtterAssistant',
@@ -709,20 +540,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 1,
         prices: [200],
-        dependencies: [
-            {
-                upgradeId: 'longerLegs',
-                minLevel: 5,
-                teaseLevel: 4
-            },
-            {
-                upgradeId: 'wideStance',
-                minLevel: 5,
-                teaseLevel: 4
-            },
-        ],
-        x: 66.65,
-        y: 25.39
+        dependency: { upgradeId: 'longerLegs', minLevel: 5, teaseLevel: 4 },
+        x: 833,
+        y: -1230
     },
     {
         id: 'otterFocus',
@@ -741,15 +561,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 6,
         prices: [80, 128, 205, 328, 524, 839],
-        dependencies: [
-            {
-                upgradeId: 'trainedOtterAssistant',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 39.83,
-        y: 11.7
+        dependency: { upgradeId: 'trainedOtterAssistant', minLevel: 1, teaseLevel: 1 },
+        x: -509,
+        y: -1915
     },
     {
         id: 'otterReach',
@@ -768,15 +582,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 6,
         prices: [90, 144, 230, 369, 590, 944],
-        dependencies: [
-            {
-                upgradeId: 'trainedOtterAssistant',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 76.01,
-        y: 20.12
+        dependency: { upgradeId: 'trainedOtterAssistant', minLevel: 1, teaseLevel: 1 },
+        x: 1301,
+        y: -1494
     },
     {
         id: 'secondOtter',
@@ -795,20 +603,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 1,
         prices: [500],
-        dependencies: [
-            {
-                upgradeId: 'otterFocus',
-                minLevel: 3,
-                teaseLevel: 2
-            },
-            {
-                upgradeId: 'otterReach',
-                minLevel: 3,
-                teaseLevel: 2
-            },
-        ],
-        x: 82.53,
-        y: 12.7
+        dependency: { upgradeId: 'otterFocus', minLevel: 3, teaseLevel: 2 },
+        x: 1627,
+        y: -1865
     },
     {
         id: 'juiceRefinery',
@@ -827,15 +624,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 6,
         prices: [150, 255, 433, 737, 1253, 2130],
-        dependencies: [
-            {
-                upgradeId: 'secondOtter',
-                minLevel: 1,
-                teaseLevel: 1
-            },
-        ],
-        x: 89.02,
-        y: 5.23
+        dependency: { upgradeId: 'secondOtter', minLevel: 1, teaseLevel: 1 },
+        x: 1951,
+        y: -2238
     },
     {
         id: 'otterColony',
@@ -854,15 +645,9 @@ export const INITIAL_UPGRADES = [
         level: 0,
         levelCap: 3,
         prices: [1000, 2200, 4840],
-        dependencies: [
-            {
-                upgradeId: 'juiceRefinery',
-                minLevel: 3,
-                teaseLevel: 2
-            },
-        ],
-        x: 95.54,
-        y: -2.24
+        dependency: { upgradeId: 'juiceRefinery', minLevel: 3, teaseLevel: 2 },
+        x: 2277,
+        y: -2612
     }
 ];
 //# sourceMappingURL=UpgradeData.js.map
